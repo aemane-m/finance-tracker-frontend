@@ -1,0 +1,31 @@
+/* ── Scrollbar ────────────────────────────────────────────────────────────── */
+nav::-webkit-scrollbar        { width: 3px; }
+nav::-webkit-scrollbar-track  { background: transparent; }
+nav::-webkit-scrollbar-thumb  { background: #e2e8f0; border-radius: 10px; }
+
+/* ── Material Symbols defaults ────────────────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 350, 'GRAD' 0, 'opsz' 24;
+  font-size: 20px;
+}
+
+/* ── Nav link — hover: fill icon ─────────────────────────────────────────── */
+.nav-link:hover .nav-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ── Nav link — active state ─────────────────────────────────────────────── */
+.nav-link.is-active {
+  background-color: #f0fdf9;
+  color: #0f766e;
+  font-weight: 600;
+
+  .nav-icon {
+    color: #0f766e;
+    font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+  }
+}
+
+.nav-link.is-active:hover {
+  background-color: #dcfce7;
+}

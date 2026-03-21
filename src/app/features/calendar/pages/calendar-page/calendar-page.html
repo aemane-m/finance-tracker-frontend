@@ -1,0 +1,519 @@
+<div class="min-h-screen bg-[#f0f2f5] flex flex-col">
+
+  <!-- Top bar -->
+  <div class="px-6 lg:px-8 pt-6 pb-4">
+    <div class="max-w-[1400px] mx-auto">
+
+      <!-- Header row -->
+      <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight capitalize text-slate-900">{{ monthLabel }}</h2>
+          <p class="text-slate-500 mt-1 text-sm">{{ events.length }} événement{{ events.length !== 1 ? 's' : '' }} ce mois</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <!-- Month navigation -->
+          <div class="flex bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <button (click)="prevMonth()" class="p-2.5 hover:bg-slate-50 text-slate-600 border-r border-slate-200 transition-colors">
+              <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+            </button>
+            <button (click)="goToday()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 border-r border-slate-200 transition-colors">
+              Aujourd'hui
+            </button>
+            <button (click)="nextMonth()" class="p-2.5 hover:bg-slate-50 text-slate-600 transition-colors">
+              <span class="material-symbols-outlined text-[20px]">chevron_right</span>
+            </button>
+          </div>
+          <button
+            (click)="openCreate()"
+            class="flex items-center gap-2 bg-[#0f766e] text-white font-semibold py-2.5 px-5 rounded-xl shadow hover:bg-[#0d6661] hover:shadow-md transition-all text-sm"
+          >
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            Nouvel événement
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI summary + filters row -->
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Filters -->
+        <div class="flex bg-white border border-slate-200 rounded-xl p-1 gap-1 shadow-sm">
+          <button (click)="setFilter('all')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            [class.bg-[#0f766e]]="isFilterActive('all')" [class.text-white]="isFilterActive('all')"
+            [class.text-slate-500]="!isFilterActive('all')">
+            Tous
+          </button>
+          <button (click)="setFilter('income')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            [class.bg-emerald-500]="isFilterActive('income')" [class.text-white]="isFilterActive('income')"
+            [class.text-slate-500]="!isFilterActive('income')">
+            Revenus ({{ categoryCount('income') }})
+          </button>
+          <button (click)="setFilter('expense')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            [class.bg-rose-500]="isFilterActive('expense')" [class.text-white]="isFilterActive('expense')"
+            [class.text-slate-500]="!isFilterActive('expense')">
+            Dépenses ({{ categoryCount('expense') }})
+          </button>
+          <button (click)="setFilter('debt')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            [class.bg-amber-500]="isFilterActive('debt')" [class.text-white]="isFilterActive('debt')"
+            [class.text-slate-500]="!isFilterActive('debt')">
+            Dettes ({{ categoryCount('debt') }})
+          </button>
+          <button (click)="setFilter('event')" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            [class.bg-indigo-500]="isFilterActive('event')" [class.text-white]="isFilterActive('event')"
+            [class.text-slate-500]="!isFilterActive('event')">
+            Événements ({{ categoryCount('event') }})
+          </button>
+        </div>
+
+        <!-- Monthly KPIs -->
+        <div class="flex gap-3 ml-auto">
+          <div class="bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-emerald-500 text-[16px]">arrow_upward</span>
+            <span class="text-slate-400 text-xs">Entrées</span>
+            <span class="font-bold text-emerald-600">+{{ monthTotalIn | number:'1.0-0' }} €</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-rose-500 text-[16px]">arrow_downward</span>
+            <span class="text-slate-400 text-xs">Sorties</span>
+            <span class="font-bold text-rose-600">-{{ monthTotalOut | number:'1.0-0' }} €</span>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-xl px-4 py-2 shadow-sm flex items-center gap-2 text-sm">
+            <span class="material-symbols-outlined text-[16px]" [class.text-emerald-500]="monthNet >= 0" [class.text-rose-500]="monthNet < 0">balance</span>
+            <span class="text-slate-400 text-xs">Net</span>
+            <span class="font-bold" [class.text-emerald-600]="monthNet >= 0" [class.text-rose-600]="monthNet < 0">
+              {{ monthNet >= 0 ? '+' : '' }}{{ monthNet | number:'1.0-0' }} €
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Calendar + sidebar -->
+  <div class="flex flex-1 gap-0 overflow-hidden px-6 lg:px-8 pb-6">
+    <div class="max-w-[1400px] mx-auto flex flex-1 gap-4 w-full min-h-0">
+
+      <!-- Calendar grid -->
+      <div class="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-w-0">
+
+        @if (loading) {
+          <div class="grid grid-cols-7 gap-px bg-slate-100 flex-1 animate-pulse">
+            @for (h of weekDays; track h) {
+              <div class="bg-slate-50 py-4"></div>
+            }
+            @for (i of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42]; track i) {
+              <div class="bg-white min-h-[100px]"></div>
+            }
+          </div>
+        } @else if (error) {
+          <div class="flex-1 flex items-center justify-center">
+            <div class="text-center p-12">
+              <span class="material-symbols-outlined text-5xl text-red-300 block mb-3">error_outline</span>
+              <p class="text-slate-600 font-medium">{{ error }}</p>
+              <button (click)="loadMonth()" class="mt-4 text-sm text-[#0f766e] hover:underline font-semibold">Réessayer</button>
+            </div>
+          </div>
+        } @else {
+          <!-- Week day headers -->
+          <div class="grid grid-cols-7 border-b border-slate-100">
+            @for (dayName of weekDays; track dayName) {
+              <div class="py-3 text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest border-r border-slate-100 last:border-r-0">
+                {{ dayName }}
+              </div>
+            }
+          </div>
+
+          <!-- Day cells -->
+          <div class="grid grid-cols-7 flex-1" style="grid-template-rows: repeat(6, 1fr)">
+            @for (day of calendarDays; track trackByDate($index, day)) {
+              <div
+                class="border-r border-b border-slate-100 last:border-r-0 p-2 flex flex-col gap-1 cursor-pointer transition-colors min-h-[90px]"
+                [class.bg-slate-50]="!day.isCurrentMonth"
+                [class.hover:bg-slate-50]="day.isCurrentMonth && selectedDay?.dateStr !== day.dateStr"
+                [class.hover:bg-slate-100]="!day.isCurrentMonth"
+                [class.bg-teal-50]="selectedDay?.dateStr === day.dateStr && !day.isToday"
+                [class.bg-[#0f766e]/8]="day.isToday"
+                (click)="selectDay(day)"
+              >
+                <!-- Day number -->
+                <div class="flex items-center justify-between mb-0.5">
+                  <span
+                    class="text-xs font-bold w-7 h-7 flex items-center justify-center rounded-full transition-all"
+                    [class.bg-[#0f766e]]="day.isToday"
+                    [class.text-white]="day.isToday"
+                    [class.text-slate-800]="day.isCurrentMonth && !day.isToday"
+                    [class.text-slate-300]="!day.isCurrentMonth"
+                    [class.font-extrabold]="day.isToday"
+                  >
+                    {{ day.date | date:'d' }}
+                  </span>
+                  @if (filteredEvents(day.events).length > 0) {
+                    <span class="text-[9px] font-bold text-slate-400 leading-none">
+                      @if (filteredEvents(day.events).length > 2) { +{{ filteredEvents(day.events).length - 2 }} }
+                    </span>
+                  }
+                </div>
+
+                <!-- Calendar event pills -->
+                @for (event of filteredEvents(day.events).slice(0, 2); track trackById($index, event)) {
+                  <button
+                    class="text-left text-[10px] px-1.5 py-0.5 rounded-md font-semibold truncate w-full leading-tight"
+                    [style.background-color]="eventPillBg(event)"
+                    [style.color]="eventPillColor(event)"
+                    (click)="$event.stopPropagation(); selectDay(day); openEdit(event)"
+                    [title]="event.title + (event.amount != null ? ' · ' + amountText(event.amount) : '')"
+                  >
+                    <span class="inline-block w-1.5 h-1.5 rounded-full mr-1 align-middle" [style.background-color]="eventPillColor(event)"></span>
+                    {{ event.title }}
+                  </button>
+                }
+
+                <!-- Planned transaction badges -->
+                @for (p of plannedForDay(day.dateStr).slice(0, 2); track trackByPId($index, p)) {
+                  <div
+                    class="text-[10px] px-1.5 py-0.5 rounded-md font-semibold truncate w-full leading-tight border border-dashed flex items-center gap-1"
+                    [class.border-emerald-300]="p.type === 'INCOME'"
+                    [class.text-emerald-700]="p.type === 'INCOME'"
+                    [class.bg-emerald-50]="p.type === 'INCOME'"
+                    [class.border-rose-300]="p.type === 'EXPENSE'"
+                    [class.text-rose-600]="p.type === 'EXPENSE'"
+                    [class.bg-rose-50]="p.type === 'EXPENSE'"
+                    [title]="p.label + ' · ' + plannedAmountText(p) + ' (' + frequencyLabel(p.frequency) + ')'"
+                  >
+                    <span class="material-symbols-outlined text-[10px] leading-none shrink-0">event_repeat</span>
+                    <span class="truncate">{{ p.label }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Day detail sidebar -->
+      @if (selectedDay) {
+        <aside class="w-72 flex-shrink-0 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col overflow-hidden">
+          <!-- Sidebar header -->
+          <div class="px-5 py-4 border-b border-slate-100 flex items-start justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                {{ selectedDay.date | date:'EEEE' }}
+              </p>
+              <p class="text-2xl font-extrabold text-slate-900 leading-tight">{{ selectedDay.date | date:'d' }}</p>
+              <p class="text-sm text-slate-400 capitalize">{{ selectedDay.date | date:'MMMM yyyy' }}</p>
+            </div>
+            <div class="flex items-center gap-1">
+              <button
+                (click)="openCreate(selectedDay)"
+                class="p-1.5 rounded-lg text-[#0f766e] hover:bg-[#0f766e]/10 transition-colors"
+                title="Ajouter un événement ce jour"
+              >
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              </button>
+              <button
+                (click)="selectedDay = null; lastSelectedDateStr = null"
+                class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              >
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Day balance mini KPIs -->
+          @if (selectedDay.events.length > 0) {
+            <div class="grid grid-cols-2 gap-0 border-b border-slate-100">
+              <div class="px-4 py-3 border-r border-slate-100">
+                <p class="text-[10px] text-slate-400 font-semibold uppercase">Entrées</p>
+                <p class="text-sm font-extrabold text-emerald-600">+{{ selectedDayScheduledIn | number:'1.0-0' }} €</p>
+              </div>
+              <div class="px-4 py-3">
+                <p class="text-[10px] text-slate-400 font-semibold uppercase">Sorties</p>
+                <p class="text-sm font-extrabold text-rose-500">-{{ selectedDayScheduledOut | number:'1.0-0' }} €</p>
+              </div>
+            </div>
+          }
+
+          <!-- Events list -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-2">
+            @if (selectedDayEvents.length === 0) {
+              <div class="py-10 flex flex-col items-center text-center">
+                <span class="material-symbols-outlined text-3xl text-slate-200 mb-2">event_busy</span>
+                <p class="text-xs text-slate-400 font-medium">Aucun événement</p>
+                <button
+                  (click)="openCreate(selectedDay)"
+                  class="mt-3 text-xs text-[#0f766e] font-semibold hover:underline"
+                >+ Ajouter un événement</button>
+              </div>
+            } @else {
+              @for (event of selectedDayEvents; track trackById($index, event)) {
+                <div
+                  class="rounded-xl p-3 border transition-all"
+                  [style.border-left-color]="eventPillColor(event)"
+                  [style.border-left-width]="'3px'"
+                  [class.border-slate-100]="true"
+                  [class.bg-slate-50]="true"
+                >
+                  <div class="flex items-start justify-between gap-2 mb-1">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <span
+                        class="material-symbols-outlined text-[16px] flex-shrink-0"
+                        [style.color]="eventPillColor(event)"
+                      >{{ eventIcon(event) }}</span>
+                      <p class="text-xs font-bold text-slate-800 truncate">{{ event.title }}</p>
+                    </div>
+                    <div class="flex gap-0.5 flex-shrink-0">
+                      <button (click)="openEdit(event)" class="p-1 rounded text-slate-300 hover:text-[#0f766e] hover:bg-white transition-colors">
+                        <span class="material-symbols-outlined text-[14px]">edit</span>
+                      </button>
+                      <button (click)="deleteEvent(event)" class="p-1 rounded text-slate-300 hover:text-red-500 hover:bg-white transition-colors">
+                        <span class="material-symbols-outlined text-[14px]">delete</span>
+                      </button>
+                    </div>
+                  </div>
+                  @if (event.amount != null) {
+                    <p
+                      class="text-sm font-extrabold mt-1"
+                      [class.text-emerald-600]="event.amount > 0"
+                      [class.text-rose-500]="event.amount < 0"
+                    >{{ amountText(event.amount) }}</p>
+                  }
+                  @if (event.notes) {
+                    <p class="text-[11px] text-slate-400 mt-1 line-clamp-2">{{ event.notes }}</p>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Planned transactions for this day -->
+          @if (selectedDayPlanned().length > 0) {
+            <div class="border-t border-slate-100 px-4 py-3 space-y-2">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+                <span class="material-symbols-outlined text-[13px] text-indigo-400">event_repeat</span>
+                Récurrences prévues
+              </p>
+              @for (p of selectedDayPlanned(); track trackByPId($index, p)) {
+                <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-xl border border-dashed"
+                  [class.border-emerald-200]="p.type === 'INCOME'"
+                  [class.bg-emerald-50]="p.type === 'INCOME'"
+                  [class.border-rose-200]="p.type === 'EXPENSE'"
+                  [class.bg-rose-50]="p.type === 'EXPENSE'"
+                >
+                  <div class="flex items-center gap-2 min-w-0">
+                    <span class="material-symbols-outlined text-[15px] shrink-0"
+                      [class.text-emerald-500]="p.type === 'INCOME'"
+                      [class.text-rose-500]="p.type === 'EXPENSE'"
+                    >{{ p.type === 'INCOME' ? 'trending_up' : 'trending_down' }}</span>
+                    <div class="min-w-0">
+                      <p class="text-xs font-semibold truncate"
+                        [class.text-emerald-800]="p.type === 'INCOME'"
+                        [class.text-rose-800]="p.type === 'EXPENSE'"
+                      >{{ p.label }}</p>
+                      <p class="text-[10px] text-slate-400">{{ frequencyLabel(p.frequency) }}</p>
+                    </div>
+                  </div>
+                  <span class="text-xs font-extrabold shrink-0"
+                    [class.text-emerald-600]="p.type === 'INCOME'"
+                    [class.text-rose-600]="p.type === 'EXPENSE'"
+                  >{{ plannedAmountText(p) }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Sidebar footer -->
+          <div class="border-t border-slate-100 px-4 py-3">
+            <button
+              (click)="openCreate(selectedDay)"
+              class="w-full flex items-center justify-center gap-2 py-2 rounded-xl border-2 border-dashed border-slate-200 text-xs font-semibold text-slate-400 hover:border-[#0f766e]/40 hover:text-[#0f766e] hover:bg-[#0f766e]/5 transition-all"
+            >
+              <span class="material-symbols-outlined text-[16px]">add</span>
+              Ajouter un événement
+            </button>
+          </div>
+        </aside>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Backdrop -->
+@if (showForm) {
+  <div class="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-30" (click)="closeForm()"></div>
+}
+
+<!-- Event form slide-in panel -->
+<aside
+  class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-40 flex flex-col transition-transform duration-300 ease-in-out"
+  [class.translate-x-full]="!showForm"
+  [class.translate-x-0]="showForm"
+>
+  <!-- Panel header with live preview -->
+  <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+    <div class="flex items-center gap-3">
+      <div
+        class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-sm transition-all"
+        [style.background-color]="selectedColor"
+      >
+        <span class="material-symbols-outlined text-[20px]">event</span>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-900 text-base leading-tight">
+          {{ editingId ? 'Modifier l\'événement' : 'Nouvel événement' }}
+        </h3>
+        <p class="text-xs text-slate-400 mt-0.5">{{ editingId ? 'Mettez à jour les informations' : 'Planifiez un événement financier' }}</p>
+      </div>
+    </div>
+    <button (click)="closeForm()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto px-6 py-5">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate id="event-form" class="space-y-5">
+
+      <!-- Title -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+          Titre <span class="text-red-400">*</span>
+        </label>
+        <input
+          type="text"
+          formControlName="title"
+          required
+          maxlength="100"
+          placeholder="Ex : Loyer, Salaire, Échéance..."
+          class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+          [class.border-red-400]="title.invalid && title.touched"
+          [class.border-slate-200]="!(title.invalid && title.touched)"
+        />
+        @if (title.touched && title.hasError('required')) {
+          <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">error</span> Le titre est obligatoire.
+          </p>
+        }
+      </div>
+
+      <!-- Date + Amount -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Date <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="date"
+            formControlName="eventDate"
+            required
+            class="w-full rounded-xl border px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+            [class.border-red-400]="eventDate.invalid && eventDate.touched"
+            [class.border-slate-200]="!(eventDate.invalid && eventDate.touched)"
+          />
+          @if (eventDate.touched && eventDate.hasError('required')) {
+            <p class="mt-1.5 text-xs text-red-500">Obligatoire.</p>
+          }
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Montant (€) <span class="text-slate-300">facultatif</span>
+          </label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">€</span>
+            <input
+              type="number"
+              formControlName="amount"
+              step="0.01"
+              placeholder="-1200"
+              class="w-full rounded-xl border border-slate-200 pl-7 pr-3 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+            />
+          </div>
+          <p class="mt-1 text-[10px] text-slate-400">Négatif = sortie</p>
+        </div>
+      </div>
+
+      <!-- Color presets -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Couleur</label>
+        <div class="flex flex-wrap gap-2 mb-2">
+          @for (color of presetEventColors; track color) {
+            <button
+              type="button"
+              (click)="selectEventColor(color)"
+              class="w-8 h-8 rounded-lg transition-all hover:scale-110 border-2"
+              [style.background-color]="color"
+              [class.border-slate-700]="selectedColor === color"
+              [class.border-transparent]="selectedColor !== color"
+              [attr.title]="color"
+            ></button>
+          }
+          <label class="w-8 h-8 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 transition overflow-hidden relative" title="Couleur personnalisée">
+            <span class="material-symbols-outlined text-[14px] text-slate-400">colorize</span>
+            <input type="color" formControlName="color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+          </label>
+        </div>
+        <!-- Amount color hint -->
+        @if (amount.value !== null && amount.value !== undefined) {
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium"
+            [class.bg-emerald-50]="amount.value >= 0"
+            [class.text-emerald-700]="amount.value >= 0"
+            [class.bg-rose-50]="amount.value < 0"
+            [class.text-rose-700]="amount.value < 0"
+          >
+            <span class="material-symbols-outlined text-[14px]">
+              {{ amount.value >= 0 ? 'arrow_upward' : 'arrow_downward' }}
+            </span>
+            {{ amount.value >= 0 ? "Entrée d'argent" : "Sortie d'argent" }} — {{ amountText(amount.value) }}
+          </div>
+        }
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+          Notes <span class="text-slate-300">(facultatif)</span>
+        </label>
+        <textarea
+          formControlName="notes"
+          maxlength="2000"
+          rows="3"
+          placeholder="Description, rappels, infos complémentaires..."
+          class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition resize-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+        ></textarea>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Panel footer -->
+  <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+    <button
+      type="submit"
+      form="event-form"
+      [disabled]="saving || form.invalid"
+      class="flex-1 flex items-center justify-center gap-2 text-white text-sm font-semibold py-2.5 rounded-xl disabled:opacity-60 transition shadow-sm hover:opacity-90"
+      [style.background-color]="selectedColor"
+    >
+      @if (saving) {
+        <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+        Enregistrement…
+      } @else {
+        <span class="material-symbols-outlined text-[18px]">save</span>
+        {{ editingId ? 'Mettre à jour' : 'Créer l\'événement' }}
+      }
+    </button>
+    <button type="button" (click)="closeForm()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+      Annuler
+    </button>
+  </div>
+</aside>
+
+@if (editingId && showForm) {
+  <div class="fixed bottom-20 right-6 z-50">
+    <button
+      (click)="deleteEvent(selectedEvent!)"
+      class="flex items-center gap-2 px-4 py-2 bg-white border border-red-200 text-red-500 rounded-xl shadow-lg text-sm font-semibold hover:bg-red-50 transition"
+    >
+      <span class="material-symbols-outlined text-[16px]">delete</span>
+      Supprimer cet événement
+    </button>
+  </div>
+}

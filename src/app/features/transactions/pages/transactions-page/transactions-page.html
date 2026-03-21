@@ -1,0 +1,418 @@
+<div class="min-h-screen bg-[#f0f2f5] text-slate-900">
+  <main class="max-w-7xl mx-auto w-full px-4 md:px-8 py-8">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900">Transactions</h1>
+        <p class="text-slate-500 mt-1 text-sm font-medium">Historique et gestion de vos mouvements financiers</p>
+      </div>
+      <button
+        (click)="openCreate()"
+        class="flex items-center justify-center gap-2 bg-[#0f766e] hover:bg-[#0d6661] text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-[#0f766e]/25 transition-all active:scale-95"
+      >
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Nouvelle transaction
+      </button>
+    </div>
+
+    <!-- Summary cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-7">
+
+      <!-- Revenus — gradient emerald -->
+      <div class="relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-400 p-5 rounded-2xl shadow-md text-white">
+        <div class="absolute -right-3 -top-3 w-20 h-20 rounded-full bg-white/10"></div>
+        <div class="absolute -right-1 -bottom-5 w-28 h-28 rounded-full bg-white/5"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="size-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white text-[20px]">trending_up</span>
+          </div>
+          <p class="text-xs font-bold text-emerald-50 uppercase tracking-widest">Total revenus</p>
+        </div>
+        <p class="text-2xl font-black text-white">+{{ totalIncome | number:'1.2-2' }} €</p>
+        <p class="text-xs text-emerald-100 mt-1 font-medium">Ce mois (filtré)</p>
+      </div>
+
+      <!-- Dépenses — gradient rose -->
+      <div class="relative overflow-hidden bg-gradient-to-br from-rose-500 to-rose-400 p-5 rounded-2xl shadow-md text-white">
+        <div class="absolute -right-3 -top-3 w-20 h-20 rounded-full bg-white/10"></div>
+        <div class="absolute -right-1 -bottom-5 w-28 h-28 rounded-full bg-white/5"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="size-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white text-[20px]">trending_down</span>
+          </div>
+          <p class="text-xs font-bold text-rose-50 uppercase tracking-widest">Total dépenses</p>
+        </div>
+        <p class="text-2xl font-black text-white">-{{ totalExpense | number:'1.2-2' }} €</p>
+        <p class="text-xs text-rose-100 mt-1 font-medium">Ce mois (filtré)</p>
+      </div>
+
+      <!-- Solde net — gradient indigo -->
+      <div class="relative overflow-hidden bg-gradient-to-br from-indigo-500 to-violet-500 p-5 rounded-2xl shadow-md text-white">
+        <div class="absolute -right-3 -top-3 w-20 h-20 rounded-full bg-white/10"></div>
+        <div class="absolute -right-1 -bottom-5 w-28 h-28 rounded-full bg-white/5"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="size-9 rounded-xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-white text-[20px]">account_balance_wallet</span>
+          </div>
+          <p class="text-xs font-bold text-indigo-100 uppercase tracking-widest">Solde net</p>
+        </div>
+        <p class="text-2xl font-black text-white">{{ netFlow >= 0 ? '+' : '' }}{{ netFlow | number:'1.2-2' }} €</p>
+        <p class="text-xs text-indigo-100 mt-1 font-medium">Revenus − Dépenses</p>
+      </div>
+
+    </div>
+
+    <!-- Create / Edit form panel -->
+    @if (showForm) {
+      <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 mb-6">
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-3">
+            <div class="size-8 rounded-lg bg-[#0f766e]/10 flex items-center justify-center">
+              <span class="material-symbols-outlined text-[#0f766e] text-[18px]">{{ editingId ? 'edit' : 'add' }}</span>
+            </div>
+            <h2 class="text-base font-bold text-slate-800">
+              {{ editingId ? 'Modifier la transaction' : 'Nouvelle transaction' }}
+            </h2>
+          </div>
+          <button (click)="closeForm()" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition">
+            <span class="material-symbols-outlined text-lg">close</span>
+          </button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+          <!-- Label -->
+          <div class="space-y-1.5 lg:col-span-2">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Libellé <span class="text-rose-400">*</span></label>
+            <input
+              type="text"
+              formControlName="label"
+              maxlength="255"
+              required
+              placeholder="Ex : Courses Lidl"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              [class.border-rose-400]="label.invalid && label.touched"
+            />
+            @if (label.touched && label.hasError('required')) {
+              <p class="text-xs text-rose-500">Le libellé est obligatoire.</p>
+            }
+            @if (label.touched && label.hasError('maxlength')) {
+              <p class="text-xs text-rose-500">255 caractères maximum.</p>
+            }
+          </div>
+
+          <!-- Amount -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Montant (€) <span class="text-rose-400">*</span></label>
+            <input
+              type="number"
+              formControlName="amount"
+              min="0.01"
+              step="0.01"
+              required
+              placeholder="0.00"
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              [class.border-rose-400]="amount.invalid && amount.touched"
+            />
+            @if (amount.touched && amount.hasError('required')) {
+              <p class="text-xs text-rose-500">Le montant est obligatoire.</p>
+            }
+            @if (amount.touched && amount.hasError('min')) {
+              <p class="text-xs text-rose-500">Doit être supérieur à 0.</p>
+            }
+          </div>
+
+          <!-- Type -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Type <span class="text-rose-400">*</span></label>
+            <select
+              formControlName="type"
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+            >
+              <option value="EXPENSE">Dépense</option>
+              <option value="INCOME">Revenu</option>
+            </select>
+          </div>
+
+          <!-- Category -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Catégorie <span class="text-rose-400">*</span></label>
+            <select
+              formControlName="categoryId"
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              [class.border-rose-400]="categoryId.invalid && categoryId.touched"
+            >
+              <option [ngValue]="null" disabled>Choisir une catégorie</option>
+              @for (cat of allCategories; track cat.id) {
+                <option [ngValue]="cat.id">{{ cat.name }}</option>
+              }
+            </select>
+            @if (categoryId.touched && categoryId.hasError('required')) {
+              <p class="text-xs text-rose-500">La catégorie est obligatoire.</p>
+            }
+          </div>
+
+          <!-- Date -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Date <span class="text-rose-400">*</span></label>
+            <input
+              type="date"
+              formControlName="date"
+              required
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              [class.border-rose-400]="date.invalid && date.touched"
+            />
+            @if (date.touched && date.hasError('required')) {
+              <p class="text-xs text-rose-500">La date est obligatoire.</p>
+            }
+          </div>
+
+          <!-- Note -->
+          <div class="space-y-1.5 lg:col-span-3">
+            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Note <span class="text-slate-300 font-normal normal-case">(optionnel)</span></label>
+            <input
+              type="text"
+              formControlName="note"
+              maxlength="2000"
+              placeholder="Ajouter une note..."
+              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+            />
+          </div>
+
+          <!-- Actions -->
+          <div class="lg:col-span-3 flex justify-end gap-3 pt-3 border-t border-slate-100">
+            <button type="button" (click)="closeForm()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+              Annuler
+            </button>
+            <button
+              type="submit"
+              [disabled]="saving || form.invalid"
+              class="px-6 py-2.5 bg-[#0f766e] hover:bg-[#0d6661] text-white text-sm font-bold rounded-xl transition-colors shadow-sm shadow-[#0f766e]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {{ saving ? 'Enregistrement...' : (editingId ? 'Mettre à jour' : 'Créer') }}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    }
+
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
+        <div class="lg:col-span-2 space-y-1.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Recherche</label>
+          <div class="relative flex items-center">
+            <span class="material-symbols-outlined absolute left-3 text-slate-400 text-[18px]">search</span>
+            <input [(ngModel)]="search" (ngModelChange)="onFiltersChanged()"
+              class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] text-sm placeholder:text-slate-400 transition"
+              placeholder="Libellé, note..." type="text" />
+          </div>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Type</label>
+          <select [(ngModel)]="selectedType" (ngModelChange)="onFiltersChanged()"
+            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] text-sm transition">
+            <option value="ALL">Tous</option>
+            <option value="INCOME">Revenu</option>
+            <option value="EXPENSE">Dépense</option>
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Catégorie</label>
+          <select [(ngModel)]="selectedCategory" (ngModelChange)="onFiltersChanged()"
+            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] text-sm transition">
+            <option value="ALL">Toutes</option>
+            @for (category of categories; track category) {
+              <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Période</label>
+          <select [(ngModel)]="selectedDateRange" (ngModelChange)="onFiltersChanged()"
+            class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] text-sm transition">
+            <option value="30d">30 derniers jours</option>
+            <option value="month">Ce mois</option>
+            <option value="all">Tout</option>
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Montant (€)</label>
+          <div class="flex items-center gap-2">
+            <input [(ngModel)]="minAmount" (ngModelChange)="onFiltersChanged()"
+              class="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              placeholder="Min" type="number" min="0" />
+            <span class="text-slate-300 font-bold">–</span>
+            <input [(ngModel)]="maxAmount" (ngModelChange)="onFiltersChanged()"
+              class="w-full py-2.5 px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/40 focus:border-[#0f766e] transition"
+              placeholder="Max" type="number" min="0" />
+          </div>
+        </div>
+      </div>
+
+      @if (activeFilterCount > 0) {
+        <div class="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+          <span class="text-xs font-semibold text-slate-400">Filtres actifs :</span>
+          @if (selectedType !== 'ALL') {
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
+              [class.bg-emerald-100]="selectedType === 'INCOME'" [class.text-emerald-700]="selectedType === 'INCOME'"
+              [class.bg-rose-100]="selectedType === 'EXPENSE'" [class.text-rose-700]="selectedType === 'EXPENSE'">
+              {{ selectedType === 'INCOME' ? 'Revenus' : 'Dépenses' }}
+            </span>
+          }
+          @if (selectedDateRange !== '30d') {
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-[#0f766e]/10 text-[#0f766e] text-xs font-semibold rounded-full">
+              {{ selectedDateRange === 'month' ? 'Ce mois' : 'Tout' }}
+            </span>
+          }
+          @if (selectedCategory !== 'ALL') {
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full">
+              {{ selectedCategory }}
+            </span>
+          }
+          <button (click)="clearFilters()" class="ml-auto text-xs font-semibold text-slate-400 hover:text-rose-500 transition-colors flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">close</span>
+            Effacer tout
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      @if (loading) {
+        <div class="p-6 space-y-3">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="h-14 rounded-xl bg-slate-100 animate-pulse"></div>
+          }
+        </div>
+      } @else if (error) {
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-5xl text-red-200 block mb-3">error_outline</span>
+          <p class="text-slate-600 font-medium mb-3">{{ error }}</p>
+          <button (click)="loadTransactions()" class="px-4 py-2 bg-[#0f766e]/10 text-[#0f766e] text-sm font-semibold rounded-lg hover:bg-[#0f766e]/20 transition">Réessayer</button>
+        </div>
+      } @else if (filteredTransactions.length === 0) {
+        <div class="p-12 text-center">
+          <span class="material-symbols-outlined text-5xl text-slate-200 block mb-3">receipt_long</span>
+          <p class="text-slate-500 font-medium">Aucune transaction ne correspond aux filtres.</p>
+          @if (activeFilterCount > 0) {
+            <button (click)="clearFilters()" class="mt-3 text-sm font-semibold text-[#0f766e] hover:underline">Effacer les filtres</button>
+          }
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50/80 border-b border-slate-100">
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Libellé</th>
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Catégorie</th>
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Type</th>
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Montant</th>
+                <th class="px-6 py-3.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-50">
+              @for (tx of pagedTransactions; track trackById($index, tx)) {
+                <tr class="hover:bg-slate-50/60 transition-colors group">
+
+                  <!-- Date -->
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-semibold text-slate-600">{{ tx.date | date:'dd MMM yyyy' }}</span>
+                  </td>
+
+                  <!-- Label + note -->
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="size-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                        [class.bg-emerald-50]="tx.type === 'INCOME'"
+                        [class.bg-slate-100]="tx.type === 'EXPENSE'">
+                        <span class="material-symbols-outlined text-[18px]"
+                          [class.text-emerald-500]="tx.type === 'INCOME'"
+                          [class.text-slate-500]="tx.type === 'EXPENSE'">
+                          {{ rowIcon(tx) }}
+                        </span>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-sm font-semibold text-slate-900 truncate">{{ tx.label }}</div>
+                        @if (tx.note) {
+                          <div class="text-xs text-slate-400 truncate max-w-[220px]">{{ tx.note }}</div>
+                        }
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Category -->
+                  <td class="px-6 py-4">
+                    <span class="inline-flex px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-semibold">
+                      {{ displayCategory(tx) }}
+                    </span>
+                  </td>
+
+                  <!-- Type badge -->
+                  <td class="px-6 py-4 text-center">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                      [class.bg-emerald-50]="tx.type === 'INCOME'" [class.text-emerald-700]="tx.type === 'INCOME'"
+                      [class.bg-rose-50]="tx.type === 'EXPENSE'" [class.text-rose-600]="tx.type === 'EXPENSE'">
+                      {{ tx.type === 'INCOME' ? 'Revenu' : 'Dépense' }}
+                    </span>
+                  </td>
+
+                  <!-- Amount -->
+                  <td class="px-6 py-4 text-right">
+                    <span class="text-sm font-bold tabular-nums" [class]="amountClass(tx)">
+                      {{ amountPrefix(tx) }}{{ tx.amount | number:'1.2-2' }} €
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-6 py-4 text-right">
+                    <div class="flex justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        (click)="openEdit(tx)"
+                        class="p-2 text-slate-400 hover:text-[#0f766e] hover:bg-[#0f766e]/10 rounded-lg transition-colors"
+                        title="Modifier"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button
+                        (click)="deleteTransaction(tx)"
+                        [disabled]="deleting"
+                        class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-40"
+                        title="Supprimer"
+                      >
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  </td>
+
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="px-6 py-4 bg-slate-50/50 border-t border-slate-100">
+          <app-pagination
+            [page]="page"
+            [totalPages]="totalPages"
+            [totalElements]="filteredTransactions.length"
+            [size]="pageSize"
+            (pageChange)="onPageChange($event)"
+          />
+        </div>
+      }
+    </div>
+
+  </main>
+</div>

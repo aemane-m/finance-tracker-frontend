@@ -1,0 +1,92 @@
+<aside
+  class="fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-100 flex flex-col z-50"
+  data-purpose="navigation-sidebar"
+>
+
+  <!-- ── Logo ────────────────────────────────────────────────────────────── -->
+  <div class="px-5 pt-6 pb-4">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 bg-gradient-to-br from-[#0f766e] to-[#0891b2] rounded-xl flex items-center justify-center shadow-md shadow-[#0f766e]/20 shrink-0">
+        <span class="material-symbols-outlined text-white text-[20px]">account_balance</span>
+      </div>
+      <div>
+        <span class="text-[15px] font-extrabold text-slate-900 tracking-tight leading-none">FinanceApp</span>
+        <p class="text-[10px] text-slate-400 font-medium mt-0.5">Gestion personnelle</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Navigation ─────────────────────────────────────────────────────── -->
+  <nav class="flex-1 px-3 py-2 overflow-y-auto space-y-5" data-purpose="primary-navigation">
+
+    @for (section of navSections; track section.label) {
+      <div>
+        <!-- Section label -->
+        <p class="px-3 mb-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest select-none">
+          {{ section.label }}
+        </p>
+
+        <!-- Nav items -->
+        <div class="space-y-0.5">
+          @for (item of section.items; track item.route) {
+            <a
+              [routerLink]="item.route"
+              routerLinkActive="is-active"
+              [routerLinkActiveOptions]="{ exact: false }"
+              class="nav-link group flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13.5px] font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition-all"
+            >
+              <span class="material-symbols-outlined text-[20px] text-slate-400 group-hover:text-slate-600 transition-colors nav-icon">
+                {{ item.icon }}
+              </span>
+              <span class="truncate">{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    }
+
+  </nav>
+
+  <!-- ── User footer ─────────────────────────────────────────────────────── -->
+  <div class="p-3 border-t border-slate-100 relative" data-purpose="user-profile-section" data-user-menu>
+
+    <button
+      (click)="toggleUserMenu()"
+      class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+    >
+      <!-- Avatar -->
+      <div class="w-8 h-8 flex-shrink-0 bg-gradient-to-br from-[#0f766e] to-[#0891b2] rounded-xl flex items-center justify-center shadow-sm">
+        <span class="text-[11px] font-bold text-white">{{ userInitials || 'U' }}</span>
+      </div>
+
+      <!-- User info -->
+      <div class="flex-1 min-w-0 text-left">
+        <p class="text-[13px] font-semibold text-slate-800 truncate leading-tight">{{ userFullName || 'Utilisateur' }}</p>
+        <p class="text-[11px] text-slate-400 truncate leading-tight">{{ userEmail }}</p>
+      </div>
+
+      <!-- Chevron -->
+      <span
+        class="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-slate-600 transition-transform duration-200 shrink-0"
+        [class.rotate-180]="showUserMenu"
+      >
+        expand_less
+      </span>
+    </button>
+
+    <!-- Dropdown menu -->
+    @if (showUserMenu) {
+      <div class="absolute bottom-full left-3 right-3 mb-2 bg-white border border-slate-200 rounded-2xl shadow-xl shadow-slate-200/60 overflow-hidden py-1.5 z-20">
+        <button
+          (click)="signOut()"
+          class="w-full flex items-center gap-3 px-4 py-2.5 text-[13px] text-red-500 hover:bg-red-50 transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">logout</span>
+          Se déconnecter
+        </button>
+      </div>
+    }
+
+  </div>
+
+</aside>

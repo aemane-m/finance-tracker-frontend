@@ -1,0 +1,318 @@
+<div class="min-h-screen bg-[#f0f2f5] text-[#111827] flex flex-col">
+  <main class="flex-1 px-6 lg:px-8 py-6 transition-all duration-300" [class.pr-[440px]]="showForm">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Header -->
+      <header class="flex flex-wrap justify-between items-end gap-4 mb-8">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight">Catégories</h2>
+          <p class="text-slate-500 mt-1">Organisez vos groupes de dépenses et de revenus</p>
+        </div>
+        <button
+          (click)="openCreate()"
+          class="flex items-center gap-2 bg-[#0f766e] text-white font-semibold py-2.5 px-5 rounded-xl transition-all shadow hover:bg-[#0d6661] hover:shadow-md"
+        >
+          <span class="material-symbols-outlined text-xl">add</span>
+          <span class="text-sm">Nouvelle catégorie</span>
+        </button>
+      </header>
+
+      <!-- Search & Tabs -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-6 flex flex-wrap gap-4 items-center">
+        <div class="relative flex-1 min-w-[200px]">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+          <input
+            type="text"
+            [(ngModel)]="query"
+            placeholder="Rechercher une catégorie..."
+            class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] transition"
+          />
+        </div>
+
+        <div class="flex bg-slate-100 rounded-xl p-1 gap-1">
+          <button
+            (click)="activeTab = 'expenses'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-1.5"
+            [class]="activeTab === 'expenses' ? 'bg-white shadow text-[#0f766e]' : 'text-slate-500 hover:text-slate-700'"
+          >
+            <span class="material-symbols-outlined text-base">shopping_bag</span>
+            Dépenses
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full"
+              [class]="activeTab === 'expenses' ? 'bg-[#0f766e]/10 text-[#0f766e]' : 'bg-slate-200 text-slate-500'">
+              {{ expenseCategories.length }}
+            </span>
+          </button>
+          <button
+            (click)="activeTab = 'income'"
+            class="px-4 py-1.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-1.5"
+            [class]="activeTab === 'income' ? 'bg-white shadow text-emerald-600' : 'text-slate-500 hover:text-slate-700'"
+          >
+            <span class="material-symbols-outlined text-base">trending_up</span>
+            Revenus
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full"
+              [class]="activeTab === 'income' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-200 text-slate-500'">
+              {{ incomeCategories.length }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading skeleton -->
+      @if (loading) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="h-36 rounded-2xl bg-white border border-slate-200 animate-pulse"></div>
+          }
+        </div>
+      } @else if (error) {
+        <div class="bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+          <span class="material-symbols-outlined text-5xl text-red-300 mb-3 block">error_outline</span>
+          <p class="text-slate-600 font-medium">{{ error }}</p>
+          <button (click)="loadCategories()" class="mt-4 text-sm text-[#0f766e] hover:underline font-semibold">
+            Réessayer
+          </button>
+        </div>
+      } @else {
+
+        <!-- Categories grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          @for (category of filteredCategories; track trackById($index, category)) {
+            <article
+              class="bg-white border border-slate-200 p-5 rounded-2xl hover:shadow-md transition-all group relative overflow-hidden"
+              [class.ring-2]="editingCategoryId === category.id && showForm"
+              [class.ring-[#0f766e]]="editingCategoryId === category.id && showForm"
+            >
+              <!-- Color accent bar -->
+              <div class="absolute top-0 left-0 right-0 h-1 rounded-t-2xl" [style.background-color]="category.color || '#0f766e'"></div>
+
+              <div class="flex justify-between items-start mb-4 mt-1">
+                <div
+                  class="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm"
+                  [style.background-color]="(category.color || '#0f766e') + '20'"
+                  [style.color]="category.color || '#0f766e'"
+                >
+                  <span class="material-symbols-outlined text-[22px]">{{ category.icon || 'category' }}</span>
+                </div>
+
+                <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    (click)="openEdit(category); $event.stopPropagation()"
+                    [disabled]="category.isDefault"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-[#0f766e] hover:bg-slate-100 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    [title]="category.isDefault ? 'Catégorie système, non modifiable' : 'Modifier'"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                  </button>
+                  <button
+                    (click)="deleteCategory(category); $event.stopPropagation()"
+                    [disabled]="category.isDefault"
+                    class="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                    [title]="category.isDefault ? 'Catégorie système, non supprimable' : 'Supprimer'"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                  </button>
+                </div>
+              </div>
+
+              <h3 class="font-bold text-[#111827] truncate text-sm">{{ category.name }}</h3>
+              <div class="flex items-center gap-2 mt-1.5">
+                <p class="text-xs text-slate-400">{{ categoryHint(category) }}</p>
+                @if (category.isDefault) {
+                  <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 font-medium">Système</span>
+                }
+              </div>
+            </article>
+          }
+
+          <!-- Add card -->
+          <button
+            (click)="openCreate()"
+            class="border-2 border-dashed border-slate-200 p-5 rounded-2xl hover:border-[#0f766e]/50 hover:bg-[#0f766e]/5 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer group text-slate-400 hover:text-[#0f766e] min-h-[140px]"
+          >
+            <span class="material-symbols-outlined text-3xl">add_circle</span>
+            <span class="text-sm font-semibold">Nouvelle catégorie</span>
+          </button>
+        </div>
+
+        @if (filteredCategories.length === 0 && !loading) {
+          <div class="mt-8 bg-white rounded-2xl border border-slate-200 p-10 text-center shadow-sm">
+            <span class="material-symbols-outlined text-4xl text-slate-300 mb-2 block">category</span>
+            <p class="text-sm text-slate-400">Aucune catégorie dans cette section.</p>
+          </div>
+        }
+      }
+    </div>
+  </main>
+
+  <!-- Overlay -->
+  @if (showForm) {
+    <div
+      class="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-30 transition-opacity"
+      (click)="cancelForm()"
+    ></div>
+  }
+
+  <!-- Slide-in Panel -->
+  <aside
+    class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-40 flex flex-col transition-transform duration-300 ease-in-out"
+    [class.translate-x-full]="!showForm"
+    [class.translate-x-0]="showForm"
+  >
+    <!-- Panel Header -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div
+          class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow"
+          [style.background-color]="selectedColor"
+        >
+          <span class="material-symbols-outlined text-[20px]">{{ selectedIcon }}</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-[#111827] text-base leading-tight">
+            {{ editingCategoryId === null ? 'Nouvelle catégorie' : 'Modifier la catégorie' }}
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">{{ editingCategoryId === null ? 'Définissez icône, couleur et nom' : 'Modifiez les informations' }}</p>
+        </div>
+      </div>
+      <button
+        (click)="cancelForm()"
+        class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+        aria-label="Fermer"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Panel Body (scrollable) -->
+    <div class="flex-1 overflow-y-auto px-6 py-5">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6" id="category-form">
+
+        <!-- Name field -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            Nom de la catégorie <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="name"
+            placeholder="ex. Abonnements"
+            required
+            minlength="2"
+            maxlength="80"
+            class="w-full border rounded-xl px-4 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] transition"
+            [class.border-red-400]="name.invalid && name.touched"
+            [class.border-slate-200]="!(name.invalid && name.touched)"
+          />
+          @if (name.touched && name.hasError('required')) {
+            <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">error</span> Le nom est obligatoire.
+            </p>
+          }
+          @if (name.touched && name.hasError('minlength')) {
+            <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">error</span> Au moins 2 caractères.
+            </p>
+          }
+          @if (name.touched && name.hasError('maxlength')) {
+            <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">error</span> 80 caractères maximum.
+            </p>
+          }
+        </div>
+
+        <!-- Color presets -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Couleur</label>
+          <div class="flex flex-wrap gap-2 mb-3">
+            @for (color of presetColors; track color) {
+              <button
+                type="button"
+                (click)="selectColor(color)"
+                class="w-8 h-8 rounded-lg transition-all hover:scale-110 border-2"
+                [style.background-color]="color"
+                [class.border-slate-800]="selectedColor === color"
+                [class.border-transparent]="selectedColor !== color"
+                [attr.title]="color"
+              ></button>
+            }
+            <!-- Custom color picker -->
+            <label class="w-8 h-8 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 transition overflow-hidden relative" title="Couleur personnalisée">
+              <span class="material-symbols-outlined text-[14px] text-slate-400">colorize</span>
+              <input type="color" formControlName="color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            </label>
+          </div>
+        </div>
+
+        <!-- Icon picker -->
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Icône</label>
+
+          <!-- Icon search -->
+          <div class="relative mb-3">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[16px]">search</span>
+            <input
+              type="text"
+              [(ngModel)]="iconSearch"
+              [ngModelOptions]="{standalone: true}"
+              placeholder="Filtrer les icônes..."
+              class="w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e] transition"
+            />
+          </div>
+
+          <!-- Icon grid -->
+          <div class="grid grid-cols-6 gap-1.5 max-h-[260px] overflow-y-auto pr-1 rounded-xl">
+            @for (item of filteredIcons; track item.icon) {
+              <button
+                type="button"
+                (click)="selectIcon(item.icon)"
+                class="flex flex-col items-center justify-center gap-0.5 p-2 rounded-xl text-[11px] transition-all border"
+                [class.border-[#0f766e]]="selectedIcon === item.icon"
+                [class.bg-[#0f766e]]="selectedIcon === item.icon"
+                [class.text-white]="selectedIcon === item.icon"
+                [class.border-transparent]="selectedIcon !== item.icon"
+                [class.bg-slate-50]="selectedIcon !== item.icon"
+                [class.text-slate-600]="selectedIcon !== item.icon"
+                [class.hover:bg-slate-100]="selectedIcon !== item.icon"
+                [title]="item.label"
+              >
+                <span class="material-symbols-outlined text-[20px]">{{ item.icon }}</span>
+                <span class="truncate w-full text-center leading-tight">{{ item.label }}</span>
+              </button>
+            }
+            @if (filteredIcons.length === 0) {
+              <div class="col-span-6 py-8 text-center text-sm text-slate-400">
+                Aucune icône trouvée
+              </div>
+            }
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- Panel Footer -->
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+      <button
+        type="submit"
+        form="category-form"
+        [disabled]="saving || form.invalid"
+        class="flex-1 flex items-center justify-center gap-2 bg-[#0f766e] text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#0d6661] disabled:opacity-60 transition shadow-sm"
+      >
+        @if (saving) {
+          <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          Enregistrement…
+        } @else {
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          {{ editingCategoryId === null ? 'Créer la catégorie' : 'Enregistrer' }}
+        }
+      </button>
+      <button
+        type="button"
+        (click)="cancelForm()"
+        class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition"
+      >
+        Annuler
+      </button>
+    </div>
+  </aside>
+</div>

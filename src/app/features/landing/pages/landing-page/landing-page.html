@@ -1,0 +1,366 @@
+<!-- Navigation -->
+<header class="fixed top-0 w-full z-50 bg-[#FAFAFA]/80 backdrop-blur-md border-b border-gray-100">
+  <nav class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 bg-[#4F46E5] rounded-lg flex items-center justify-center">
+        <div class="w-4 h-4 bg-white rounded-full"></div>
+      </div>
+      <span class="text-xl font-bold tracking-tight text-gray-900">FinFlow</span>
+    </div>
+
+    <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+      <a href="#features" class="hover:text-[#4F46E5] transition-colors">Fonctionnalités</a>
+      <a href="#security" class="hover:text-[#4F46E5] transition-colors">Sécurité</a>
+      <a href="#cta" class="hover:text-[#4F46E5] transition-colors">Démarrer</a>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <a routerLink="/login" class="text-sm font-semibold text-gray-900 px-4 py-2 hover:text-[#4F46E5] transition-colors">
+        Connexion
+      </a>
+      <a routerLink="/signup"
+         class="bg-[#4F46E5] text-white px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-indigo-700 transition-all shadow-sm">
+        Créer un compte
+      </a>
+    </div>
+  </nav>
+</header>
+
+<main class="bg-[#FAFAFA] antialiased overflow-x-hidden">
+
+  <!-- Hero -->
+  <section class="pt-32 pb-20 px-6 overflow-hidden">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+
+      <!-- Left: copy -->
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-semibold rounded-full mb-8 border border-indigo-100">
+          <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+          Gestion financière personnelle
+        </div>
+
+        <h1 class="text-5xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8 text-gray-900">
+          Prenez le contrôle de vos finances
+          <span class="text-[#4F46E5]"> avec élégance</span>
+        </h1>
+
+        <p class="text-xl text-gray-500 leading-relaxed mb-10 max-w-xl">
+          Suivez vos transactions, gérez vos budgets, atteignez vos objectifs d'épargne.
+          Une interface claire pour des décisions financières sereines.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-4">
+          <a routerLink="/signup"
+             class="inline-flex items-center justify-center gap-2 bg-[#4F46E5] text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+            Commencer maintenant
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+          <a routerLink="/login"
+             class="inline-flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-800 px-8 py-4 rounded-xl font-bold text-lg hover:border-gray-300 transition-all">
+            Se connecter
+          </a>
+        </div>
+
+        <div class="mt-12 flex items-center gap-6 text-sm text-gray-400">
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Aucune carte requise
+          </div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Données chiffrées
+          </div>
+          <div class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+            Annulez à tout moment
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: dashboard mockup -->
+      <div class="relative">
+        <div class="absolute -inset-4 bg-indigo-50 rounded-[40px] blur-3xl opacity-50 -z-10"></div>
+        <div class="bg-[#1E293B] rounded-[28px] p-2 shadow-2xl border-4 border-white/10 overflow-hidden">
+          <!-- Window chrome -->
+          <div class="px-5 py-3 border-b border-white/5 flex justify-between items-center">
+            <div class="flex gap-1.5">
+              <div class="w-3 h-3 rounded-full bg-red-400"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+              <div class="w-3 h-3 rounded-full bg-green-400"></div>
+            </div>
+            <div class="text-white/30 text-[10px] font-medium tracking-widest uppercase">FinFlow · Dashboard</div>
+            <div class="w-6 h-6 rounded-full bg-white/10"></div>
+          </div>
+          <!-- Content -->
+          <div class="p-6">
+            <!-- Stat cards -->
+            <div class="grid grid-cols-2 gap-3 mb-5">
+              <div class="p-4 rounded-xl bg-white/5 border border-white/10">
+                <div class="text-white/50 text-[10px] mb-1">Solde total</div>
+                <div class="text-white text-xl font-bold">12 450 €</div>
+                <div class="text-emerald-400 text-xs mt-0.5">+8,4 % ce mois</div>
+              </div>
+              <div class="p-4 rounded-xl bg-[#4F46E5]/20 border border-[#4F46E5]/30">
+                <div class="text-indigo-200/70 text-[10px] mb-1">Épargne</div>
+                <div class="text-white text-xl font-bold">3 200 €</div>
+                <div class="text-indigo-300 text-xs mt-0.5">Objectif : 5 000 €</div>
+              </div>
+            </div>
+            <!-- Chart bars -->
+            <div class="h-32 flex items-end gap-1.5 mb-5 px-1">
+              <div class="flex-1 bg-white/5 rounded-t h-[35%]"></div>
+              <div class="flex-1 bg-white/10 rounded-t h-[55%]"></div>
+              <div class="flex-1 bg-[#4F46E5]/60 rounded-t h-[75%]"></div>
+              <div class="flex-1 bg-white/5 rounded-t h-[25%]"></div>
+              <div class="flex-1 bg-white/10 rounded-t h-[45%]"></div>
+              <div class="flex-1 bg-[#4F46E5] rounded-t h-[90%]"></div>
+              <div class="flex-1 bg-white/10 rounded-t h-[60%]"></div>
+              <div class="flex-1 bg-white/5 rounded-t h-[40%]"></div>
+            </div>
+            <!-- Recent transactions -->
+            <div class="space-y-2">
+              <div class="flex items-center justify-between py-2 px-3 bg-white/5 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <div class="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                  </div>
+                  <div>
+                    <div class="text-white text-xs font-medium">Salaire</div>
+                    <div class="text-white/40 text-[10px]">Aujourd'hui</div>
+                  </div>
+                </div>
+                <span class="text-emerald-400 text-sm font-bold">+2 800 €</span>
+              </div>
+              <div class="flex items-center justify-between py-2 px-3 bg-white/5 rounded-lg">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-lg bg-red-500/20 flex items-center justify-center">
+                    <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                  </div>
+                  <div>
+                    <div class="text-white text-xs font-medium">Loyer</div>
+                    <div class="text-white/40 text-[10px]">Hier</div>
+                  </div>
+                </div>
+                <span class="text-red-400 text-sm font-bold">-950 €</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section id="features" class="py-24 bg-white">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center max-w-3xl mx-auto mb-20">
+        <h2 class="text-4xl font-bold mb-6 text-gray-900">Tout ce dont vous avez besoin</h2>
+        <p class="text-lg text-gray-500">Une suite d'outils financiers pensés pour la clarté et l'efficacité.</p>
+      </div>
+
+      <div class="grid md:grid-cols-3 gap-8">
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Transactions & Catégories</h3>
+          <p class="text-gray-500 leading-relaxed">Enregistrez chaque dépense et revenu. Organisez par catégories personnalisables, filtrez et recherchez en un instant.</p>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Budgets Intelligents</h3>
+          <p class="text-gray-500 leading-relaxed">Définissez des limites mensuelles par catégorie. Recevez des alertes avant de dépasser vos seuils. Visualisez d'un coup d'œil.</p>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Objectifs d'Épargne</h3>
+          <p class="text-gray-500 leading-relaxed">Planifiez un voyage, un apport immobilier, un fonds d'urgence. Suivez votre progression avec des barres visuelles claires.</p>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Transactions Planifiées</h3>
+          <p class="text-gray-500 leading-relaxed">Abonnements, loyers, salaires récurrents. Automatisez la création de vos transactions sur une fréquence choisie.</p>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Suivi des Dettes</h3>
+          <p class="text-gray-500 leading-relaxed">Suivez vos remboursements, visualisez votre progression, enregistrez chaque paiement avec historique complet.</p>
+        </div>
+
+        <div class="p-8 rounded-3xl bg-[#FAFAFA] border border-gray-100 hover:shadow-xl hover:shadow-gray-100 transition-all group">
+          <div class="w-12 h-12 rounded-xl bg-white flex items-center justify-center mb-7 border border-gray-100 group-hover:bg-[#4F46E5] group-hover:border-[#4F46E5] transition-colors">
+            <svg class="w-6 h-6 text-gray-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold mb-3 text-gray-900">Calendrier Financier</h3>
+          <p class="text-gray-500 leading-relaxed">Vue mensuelle de vos événements financiers. Anticipez vos flux, planifiez vos dépenses importantes, restez organisé.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Security section -->
+  <section id="security" class="py-24 px-6 overflow-hidden">
+    <div class="max-w-7xl mx-auto bg-[#1E293B] rounded-[48px] p-12 lg:p-20 flex flex-col lg:flex-row items-center gap-16 relative">
+
+      <div class="flex-1 text-white relative z-10">
+        <h2 class="text-4xl lg:text-5xl font-bold mb-8 leading-tight">
+          La sécurité que vous méritez.
+        </h2>
+        <div class="space-y-8">
+          <div class="flex gap-5">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[#4F46E5] flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-1.5">Authentification Supabase</h4>
+              <p class="text-slate-400 leading-relaxed">Vos identifiants sont protégés par Supabase Auth. Aucun mot de passe n'est stocké en clair. Sessions sécurisées par JWT.</p>
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[#4F46E5] flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-1.5">Données strictement personnelles</h4>
+              <p class="text-slate-400 leading-relaxed">Chaque requête est validée côté serveur via votre token. Vos données ne sont accessibles par personne d'autre que vous.</p>
+            </div>
+          </div>
+          <div class="flex gap-5">
+            <div class="shrink-0 w-10 h-10 rounded-full bg-[#4F46E5] flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="text-lg font-semibold mb-1.5">Déconnexion globale</h4>
+              <p class="text-slate-400 leading-relaxed">Révoquez toutes vos sessions actives en un clic depuis la page Sécurité. Idéal si vous suspectez un accès non autorisé.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual placeholder -->
+      <div class="flex-1 flex justify-center items-center relative">
+        <div class="absolute w-96 h-96 bg-[#4F46E5]/20 rounded-full blur-[80px]"></div>
+        <div class="relative w-72 h-80 flex items-center justify-center">
+          <div class="w-60 h-72 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl shadow-2xl rotate-6 absolute opacity-50"></div>
+          <div class="w-60 h-72 bg-white rounded-3xl shadow-2xl -rotate-3 flex flex-col p-7 gap-4 relative border border-gray-100">
+            <div class="w-full h-10 bg-gray-50 rounded-lg"></div>
+            <div class="w-3/4 h-10 bg-gray-50 rounded-lg"></div>
+            <div class="w-full h-10 bg-gray-50 rounded-lg"></div>
+            <div class="mt-auto w-full h-14 bg-[#4F46E5] rounded-xl flex items-center justify-center">
+              <div class="w-6 h-6 rounded-full border-2 border-white/50"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta" class="py-32 px-6">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-4xl lg:text-6xl font-bold mb-8 text-gray-900">
+        Prêt à reprendre le contrôle ?
+      </h2>
+      <p class="text-xl text-gray-500 mb-12">
+        Créez votre compte en quelques secondes. Aucune carte de crédit requise.
+      </p>
+      <div class="flex flex-col items-center gap-5">
+        <a routerLink="/signup"
+           class="inline-flex items-center gap-3 bg-[#4F46E5] text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200">
+          Créer mon compte gratuitement
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+          </svg>
+        </a>
+        <p class="text-sm text-gray-400 font-medium">
+          Vous avez déjà un compte ?
+          <a routerLink="/login" class="text-[#4F46E5] font-semibold hover:underline ml-1">Se connecter</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-white py-16 border-t border-gray-100">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+
+      <div class="md:col-span-2">
+        <div class="flex items-center gap-2 mb-5">
+          <div class="w-8 h-8 bg-[#4F46E5] rounded-lg flex items-center justify-center text-white font-bold text-sm">F</div>
+          <span class="text-xl font-bold tracking-tight text-gray-900">FinFlow</span>
+        </div>
+        <p class="text-gray-500 leading-relaxed max-w-xs text-sm">
+          La plateforme de gestion financière personnelle pour ceux qui veulent un contrôle clair et sans friction.
+        </p>
+      </div>
+
+      <div>
+        <h5 class="font-bold text-xs uppercase tracking-widest text-gray-900 mb-5">Application</h5>
+        <ul class="space-y-3 text-gray-500 text-sm">
+          <li><a routerLink="/login" class="hover:text-[#4F46E5] transition-colors">Connexion</a></li>
+          <li><a routerLink="/signup" class="hover:text-[#4F46E5] transition-colors">Créer un compte</a></li>
+          <li><a routerLink="/app/dashboard" class="hover:text-[#4F46E5] transition-colors">Dashboard</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h5 class="font-bold text-xs uppercase tracking-widest text-gray-900 mb-5">Légal</h5>
+        <ul class="space-y-3 text-gray-500 text-sm">
+          <li><a href="#" class="hover:text-[#4F46E5] transition-colors">Confidentialité</a></li>
+          <li><a href="#" class="hover:text-[#4F46E5] transition-colors">Conditions d'utilisation</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="mt-16 pt-8 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 text-gray-400 text-xs">
+      <p>© 2025 FinFlow. Tous droits réservés.</p>
+      <p>Gérez vos finances avec élégance.</p>
+    </div>
+  </div>
+</footer>

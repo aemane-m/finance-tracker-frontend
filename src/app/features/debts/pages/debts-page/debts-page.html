@@ -1,0 +1,689 @@
+<div class="min-h-screen bg-[#f0f2f5] text-slate-900">
+  <main class="px-6 lg:px-8 py-6 transition-all duration-300" [class.pr-[440px]]="!!activePanel">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Header -->
+      <header class="flex flex-wrap justify-between items-end gap-4 mb-8">
+        <div>
+          <h2 class="text-3xl font-extrabold tracking-tight">Emprunts actifs</h2>
+          <p class="text-slate-500 mt-1">Suivez vos remboursements et gérez vos engagements financiers</p>
+        </div>
+        <div class="flex gap-3">
+          <button
+            (click)="openCreate()"
+            class="flex items-center gap-2 bg-white border border-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl shadow-sm hover:bg-slate-50 transition-all text-sm"
+          >
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            Nouvelle dette
+          </button>
+          <button
+            (click)="openQuickPayment()"
+            class="flex items-center gap-2 bg-[#0f766e] text-white font-semibold py-2.5 px-5 rounded-xl shadow hover:bg-[#0d6661] hover:shadow-md transition-all text-sm"
+          >
+            <span class="material-symbols-outlined text-[18px]">payments</span>
+            Ajouter un paiement
+          </button>
+        </div>
+      </header>
+
+      @if (loading) {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          @for (i of [1,2,3,4]; track i) {
+            <div class="h-28 rounded-2xl bg-white border border-slate-200 animate-pulse"></div>
+          }
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          @for (i of [1,2,3]; track i) {
+            <div class="h-72 rounded-2xl bg-white border border-slate-200 animate-pulse"></div>
+          }
+        </div>
+
+      } @else if (error) {
+        <div class="bg-white rounded-2xl border border-slate-200 p-14 text-center shadow-sm">
+          <span class="material-symbols-outlined text-5xl text-red-300 mb-3 block">error_outline</span>
+          <p class="text-slate-600 font-medium">{{ error }}</p>
+          <button (click)="retryLoad()" class="mt-4 text-sm text-[#0f766e] hover:underline font-semibold">Réessayer</button>
+        </div>
+
+      } @else {
+
+        <!-- KPI Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 text-white p-5 shadow">
+            <div class="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10"></div>
+            <div class="absolute -bottom-3 -right-8 w-20 h-20 rounded-full bg-white/5"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-1">Capital restant</p>
+            <p class="text-2xl font-extrabold">{{ formatAmount(totalRemainingAmount) }}</p>
+            <div class="flex items-center gap-1 mt-2 text-xs text-white/70">
+              <span class="material-symbols-outlined text-[14px]">account_balance</span>
+              {{ activeDebts.length }} emprunt{{ activeDebts.length > 1 ? 's' : '' }} actif{{ activeDebts.length > 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-400 to-orange-400 text-white p-5 shadow">
+            <div class="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10"></div>
+            <div class="absolute -bottom-3 -right-8 w-20 h-20 rounded-full bg-white/5"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-1">Mensualités totales</p>
+            <p class="text-2xl font-extrabold">{{ formatAmount(totalMonthlyPayment) }}</p>
+            <div class="flex items-center gap-1 mt-2 text-xs text-white/70">
+              <span class="material-symbols-outlined text-[14px]">calendar_month</span>
+              Par mois
+            </div>
+          </div>
+
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white p-5 shadow">
+            <div class="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10"></div>
+            <div class="absolute -bottom-3 -right-8 w-20 h-20 rounded-full bg-white/5"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-1">Dettes actives</p>
+            <p class="text-2xl font-extrabold">{{ summary?.activeDebtsCount ?? activeDebts.length }}</p>
+            <div class="flex items-center gap-1 mt-2 text-xs text-white/70">
+              <span class="material-symbols-outlined text-[14px]">task_alt</span>
+              {{ paidDebtsCount }} remboursée{{ paidDebtsCount > 1 ? 's' : '' }}
+            </div>
+          </div>
+
+          <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-500 to-[#0f766e] text-white p-5 shadow">
+            <div class="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-white/10"></div>
+            <div class="absolute -bottom-3 -right-8 w-20 h-20 rounded-full bg-white/5"></div>
+            <p class="text-xs font-semibold uppercase tracking-widest text-white/70 mb-1">Prochaine échéance</p>
+            @if (nextMajorDueDate) {
+              <p class="text-lg font-extrabold leading-tight">{{ formatDate(nextMajorDueDate) }}</p>
+              <div class="flex items-center gap-1 mt-2 text-xs text-white/70">
+                <span class="material-symbols-outlined text-[14px]">event</span>
+                {{ nextMajorDueCreditor }}
+              </div>
+            } @else {
+              <p class="text-lg font-bold opacity-70">Aucune</p>
+              <div class="flex items-center gap-1 mt-2 text-xs text-white/70">Pas d'échéance définie</div>
+            }
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        @if (debts.length === 0) {
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm py-24 flex flex-col items-center text-center">
+            <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mb-4">
+              <span class="material-symbols-outlined text-3xl text-slate-400">account_balance</span>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-1">Aucun emprunt enregistré</h3>
+            <p class="text-sm text-slate-400 mb-6 max-w-xs">Ajoutez votre première dette pour commencer le suivi de vos remboursements.</p>
+            <button (click)="openCreate()" class="px-5 py-2.5 bg-[#0f766e] text-white rounded-xl font-semibold text-sm shadow hover:bg-[#0d6661] transition">
+              Ajouter une dette
+            </button>
+          </div>
+
+        } @else {
+          <!-- Debt cards grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            @for (debt of debts; track trackById($index, debt)) {
+              <div
+                class="bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col hover:shadow-md transition-all group cursor-pointer"
+                [class.ring-2]="(activePanel === 'pay' && payingDebt?.id === debt.id) || (activePanel === 'edit' && editingDebt?.id === debt.id)"
+                [class.ring-offset-2]="(activePanel === 'pay' && payingDebt?.id === debt.id) || (activePanel === 'edit' && editingDebt?.id === debt.id)"
+                [style.--tw-ring-color]="debtColor(debt).hex"
+                (click)="openHistory(debt)"
+              >
+                <!-- Accent bar -->
+                <div class="h-1.5 w-full" [class]="debtColor(debt).bar"></div>
+
+                <div class="p-5 flex-1 flex flex-col">
+                  <!-- Top: gauge + info -->
+                  <div class="flex items-start gap-4 mb-4">
+                    <!-- Circular repayment gauge -->
+                    <div class="relative w-14 h-14 flex-shrink-0">
+                      <div class="w-14 h-14 rounded-full" [style.background]="debtConicGradient(debt)"></div>
+                      <div class="absolute inset-[5px] rounded-full bg-white flex items-center justify-center">
+                        <span class="text-[11px] font-bold" [class]="debtColor(debt).text">{{ repaidPercent(debt) }}%</span>
+                      </div>
+                    </div>
+
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-start justify-between gap-2">
+                        <h3 class="font-bold text-slate-800 text-sm leading-tight truncate">{{ debt.creditorName }}</h3>
+                        <span class="flex-shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold border" [class]="statusClass(debt)">
+                          {{ statusLabel(debt) }}
+                        </span>
+                      </div>
+                      @if (debt.interestRate) {
+                        <p class="text-xs text-slate-400 mt-0.5">Taux {{ debt.interestRate }}%</p>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- Amounts -->
+                  <div class="flex items-end justify-between mb-3">
+                    <div>
+                      <p class="text-[11px] text-slate-400 font-medium">Capital restant</p>
+                      <p class="text-xl font-extrabold" [class]="debtColor(debt).text">{{ formatAmount(debt.remainingAmount) }}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-[11px] text-slate-400 font-medium">Montant initial</p>
+                      <p class="text-sm font-bold text-slate-500">{{ formatAmount(debt.totalAmount) }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Progress bar -->
+                  <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1.5 text-[11px]">
+                      <span class="font-semibold text-slate-400">{{ formatAmount(repaidAmount(debt)) }} remboursé</span>
+                      <span class="font-bold" [class]="debtColor(debt).text">{{ repaidPercent(debt) }}%</span>
+                    </div>
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                      <div class="h-full rounded-full transition-all duration-500" [class]="debtColor(debt).bar" [style.width.%]="repaidPercent(debt)"></div>
+                    </div>
+                  </div>
+
+                  <!-- Mensualité + deadline -->
+                  <div class="flex items-center justify-between mt-auto text-xs">
+                    <div class="flex items-center gap-1 text-slate-500">
+                      <span class="material-symbols-outlined text-[14px]">calendar_month</span>
+                      <span class="font-semibold">{{ formatAmount(debt.monthlyPayment) }}/mois</span>
+                      @if (monthsRemaining(debt)) {
+                        <span class="text-slate-300">·</span>
+                        <span class="text-slate-400">~{{ monthsRemaining(debt) }} mois</span>
+                      }
+                    </div>
+                    <div class="flex items-center gap-1" [class]="dueDateClass(debt)">
+                      <span class="material-symbols-outlined text-[14px]">event</span>
+                      <span class="font-medium">{{ dueDateLabel(debt) }}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Recent payments mini-feed -->
+                @if (debt.payments.length > 0) {
+                  <div class="border-t border-slate-50 px-5 py-3 bg-slate-50/50">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Derniers paiements</p>
+                    <div class="space-y-1.5">
+                      @for (p of debt.payments.slice(0, 2); track p.id) {
+                        <div class="flex items-center justify-between text-xs">
+                          <span class="text-slate-500">{{ formatDate(p.paymentDate) }}</span>
+                          <span class="font-bold text-slate-700">{{ formatAmount(p.amount) }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Footer actions -->
+                <div class="border-t border-slate-100 px-4 py-3 flex gap-2" (click)="$event.stopPropagation()">
+                  @if (debt.status === 'ACTIVE') {
+                    <button
+                      (click)="openPay(debt)"
+                      class="flex-1 flex items-center justify-center gap-1.5 rounded-xl text-white py-2 text-sm font-semibold transition shadow-sm"
+                      [style.background-color]="debtColor(debt).hex"
+                    >
+                      <span class="material-symbols-outlined text-[16px]">payments</span>
+                      Payer
+                    </button>
+                  } @else {
+                    <div class="flex-1 flex items-center justify-center text-sm font-semibold text-slate-400 py-2">
+                      {{ debt.status === 'PAID' ? '✓ Remboursée' : 'Annulée' }}
+                    </div>
+                  }
+                  <button
+                    (click)="openEdit(debt)"
+                    class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                    title="Modifier"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                  </button>
+                  <button
+                    (click)="deleteDebt(debt)"
+                    class="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Supprimer"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+
+            <!-- Add card -->
+            <button
+              (click)="openCreate()"
+              class="border-2 border-dashed border-slate-200 rounded-2xl min-h-[240px] flex flex-col items-center justify-center gap-3 text-slate-400 hover:text-[#0f766e] hover:border-[#0f766e]/40 hover:bg-[#0f766e]/5 transition-all"
+            >
+              <span class="material-symbols-outlined text-3xl">add_circle</span>
+              <div class="text-center">
+                <p class="text-sm font-bold">Nouvelle dette</p>
+                <p class="text-xs mt-1 opacity-70">Enregistrer un emprunt</p>
+              </div>
+            </button>
+          </div>
+
+          <!-- Footer count -->
+          <p class="mt-6 text-xs text-slate-400 text-right">
+            {{ debts.length }} dette{{ debts.length > 1 ? 's' : '' }} · {{ activeDebts.length }} active{{ activeDebts.length > 1 ? 's' : '' }}
+          </p>
+        }
+      }
+    </div>
+  </main>
+
+  <!-- History modal backdrop + dialog -->
+  @if (historyDebt) {
+    <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4" (click)="closeHistory()">
+      <div
+        class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col overflow-hidden"
+        (click)="$event.stopPropagation()"
+      >
+        <!-- Modal header -->
+        <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+          <div class="flex items-center gap-3">
+            @for (d of debts; track d.id) {
+              @if (d.id === historyDebt.id) {
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" [class]="debtColor(d).light">
+                  <span class="material-symbols-outlined text-[20px]" [class]="debtColor(d).text">receipt_long</span>
+                </div>
+              }
+            }
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Historique des paiements</h3>
+              <p class="text-xs text-slate-400 mt-0.5">{{ historyDebt.creditorName }}</p>
+            </div>
+          </div>
+          <button (click)="closeHistory()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+            <span class="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        </div>
+
+        <!-- Debt summary bar -->
+        @for (d of debts; track d.id) {
+          @if (d.id === historyDebt.id) {
+            <div class="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center gap-6 text-xs">
+              <div>
+                <span class="text-slate-400">Remboursé</span>
+                <span class="font-bold text-slate-700 ml-1">{{ formatAmount(repaidAmount(historyDebt)) }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400">Restant</span>
+                <span class="font-bold ml-1" [class]="debtColor(d).text">{{ formatAmount(historyDebt.remainingAmount) }}</span>
+              </div>
+              <div class="flex-1">
+                <div class="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full" [class]="debtColor(d).bar" [style.width.%]="repaidPercent(historyDebt)"></div>
+                </div>
+              </div>
+              <span class="font-bold" [class]="debtColor(d).text">{{ repaidPercent(historyDebt) }}%</span>
+            </div>
+          }
+        }
+
+        <!-- Payment list -->
+        <div class="flex-1 overflow-y-auto">
+          @if (historyDebt.loadingPayments) {
+            <div class="p-8 flex justify-center">
+              <span class="material-symbols-outlined animate-spin text-slate-400 text-3xl">progress_activity</span>
+            </div>
+          } @else if (historyDebt.payments.length === 0) {
+            <div class="p-12 text-center">
+              <span class="material-symbols-outlined text-4xl text-slate-200 block mb-2">payments</span>
+              <p class="text-sm text-slate-400">Aucun paiement enregistré pour cette dette.</p>
+            </div>
+          } @else {
+            <div class="divide-y divide-slate-50">
+              @for (p of historyDebt.payments; track p.id) {
+                <div class="flex items-center gap-4 px-6 py-4">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-emerald-500 text-[16px]">check_circle</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-slate-700">{{ p.note || 'Mensualité' }}</p>
+                    <p class="text-xs text-slate-400 mt-0.5">{{ formatDate(p.paymentDate) }}</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-extrabold text-slate-800">{{ formatAmount(p.amount) }}</p>
+                    <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600">Payé</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (historyDebt.paymentsPage && historyDebt.paymentsPage.totalPages > 1) {
+              <div class="px-6 py-4 border-t border-slate-100">
+                <app-pagination
+                  [page]="historyDebt.paymentsPage.number"
+                  [totalPages]="historyDebt.paymentsPage.totalPages"
+                  [totalElements]="historyDebt.paymentsPage.totalElements"
+                  [size]="historyDebt.paymentsPage.size"
+                  (pageChange)="onPaymentPageChange(historyDebt, $event)"
+                />
+              </div>
+            }
+          }
+        </div>
+
+        <!-- Modal footer -->
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+          <p class="text-xs text-slate-400">
+            {{ historyDebt.paymentsPage?.totalElements ?? historyDebt.payments.length }} paiement{{ (historyDebt.paymentsPage?.totalElements ?? historyDebt.payments.length) > 1 ? 's' : '' }}
+          </p>
+          <div class="flex gap-2">
+            @if (historyDebt.status === 'ACTIVE') {
+              <button
+                (click)="openPay(historyDebt); closeHistory()"
+                class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0f766e] text-white text-sm font-semibold transition shadow-sm hover:bg-[#0d6661]"
+              >
+                <span class="material-symbols-outlined text-[16px]">add</span>
+                Ajouter un paiement
+              </button>
+            }
+            <button (click)="closeHistory()" class="px-4 py-2 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+              Fermer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Backdrop -->
+  @if (activePanel) {
+    <div class="fixed inset-0 bg-black/20 backdrop-blur-[2px] z-30" (click)="closePanel()"></div>
+  }
+
+  <!-- Debt selector panel -->
+  <aside
+    class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-40 flex flex-col transition-transform duration-300 ease-in-out"
+    [class.translate-x-full]="!isSelectPanelOpen"
+    [class.translate-x-0]="isSelectPanelOpen"
+  >
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[#0f766e]/10 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[#0f766e] text-[20px]">payments</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base leading-tight">Ajouter un paiement</h3>
+          <p class="text-xs text-slate-400 mt-0.5">Sélectionnez la dette à rembourser</p>
+        </div>
+      </div>
+      <button (click)="closePanel()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+      @for (debt of activeDebts; track debt.id) {
+        <button
+          (click)="selectDebtForPayment(debt)"
+          class="w-full text-left bg-white border border-slate-200 rounded-xl p-4 hover:border-slate-300 hover:shadow-sm transition-all flex items-center gap-4 group"
+        >
+          <!-- Mini gauge -->
+          <div class="relative w-12 h-12 flex-shrink-0">
+            <div class="w-12 h-12 rounded-full" [style.background]="debtConicGradient(debt)"></div>
+            <div class="absolute inset-[4px] rounded-full bg-white flex items-center justify-center">
+              <span class="text-[10px] font-bold" [class]="debtColor(debt).text">{{ repaidPercent(debt) }}%</span>
+            </div>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-slate-800 text-sm truncate">{{ debt.creditorName }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">Restant : <span class="font-semibold" [class]="debtColor(debt).text">{{ formatAmount(debt.remainingAmount) }}</span></p>
+            <p class="text-xs text-slate-400">Mensualité : {{ formatAmount(debt.monthlyPayment) }}</p>
+          </div>
+          <span class="material-symbols-outlined text-slate-300 group-hover:text-slate-500 transition-colors text-[20px]">chevron_right</span>
+        </button>
+      }
+    </div>
+  </aside>
+
+  <!-- Debt form panel (create / edit) -->
+  <aside
+    class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-40 flex flex-col transition-transform duration-300 ease-in-out"
+    [class.translate-x-full]="!isDebtFormOpen"
+    [class.translate-x-0]="isDebtFormOpen"
+  >
+    <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+          <span class="material-symbols-outlined text-slate-600 text-[20px]">account_balance</span>
+        </div>
+        <div>
+          <h3 class="font-bold text-slate-900 text-base leading-tight">
+            {{ activePanel === 'edit' ? 'Modifier la dette' : 'Nouvelle dette' }}
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">{{ activePanel === 'edit' ? 'Ajustez les informations' : 'Enregistrez un nouvel emprunt' }}</p>
+        </div>
+      </div>
+      <button (click)="closePanel()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-6 py-5">
+      <form [formGroup]="debtForm" (ngSubmit)="submitDebt()" novalidate id="debt-form" class="space-y-5">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Créancier <span class="text-red-400">*</span></label>
+          <input type="text" formControlName="creditorName" required maxlength="100" placeholder="Banque, organisme de crédit..."
+            class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+            [class.border-red-400]="creditorName.invalid && creditorName.touched"
+            [class.border-slate-200]="!(creditorName.invalid && creditorName.touched)" />
+          @if (creditorName.touched && creditorName.hasError('required')) {
+            <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">error</span> Le nom du créancier est obligatoire.
+            </p>
+          }
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Montant total (€) <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">€</span>
+              <input type="number" formControlName="totalAmount" required min="0.01" step="0.01" placeholder="10 000"
+                class="w-full rounded-xl border pl-7 pr-3 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+                [class.border-red-400]="totalAmount.invalid && totalAmount.touched"
+                [class.border-slate-200]="!(totalAmount.invalid && totalAmount.touched)" />
+            </div>
+            @if (totalAmount.touched && totalAmount.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500">Obligatoire.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Mensualité (€) <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">€</span>
+              <input type="number" formControlName="monthlyPayment" required min="0.01" step="0.01" placeholder="250"
+                class="w-full rounded-xl border pl-7 pr-3 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+                [class.border-red-400]="monthlyPayment.invalid && monthlyPayment.touched"
+                [class.border-slate-200]="!(monthlyPayment.invalid && monthlyPayment.touched)" />
+            </div>
+            @if (monthlyPayment.touched && monthlyPayment.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500">Obligatoire.</p>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Taux d'intérêt (%) <span class="text-slate-300">(facultatif)</span></label>
+          <div class="relative">
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">%</span>
+            <input type="number" formControlName="interestRate" min="0" max="100" step="0.01" placeholder="3.5"
+              class="w-full rounded-xl border border-slate-200 pl-4 pr-8 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date de début <span class="text-red-400">*</span></label>
+            <input type="date" formControlName="startDate" required
+              class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+              [class.border-red-400]="startDate.invalid && startDate.touched"
+              [class.border-slate-200]="!(startDate.invalid && startDate.touched)" />
+            @if (startDate.touched && startDate.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500">Obligatoire.</p>
+            }
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date de fin <span class="text-slate-300">(facultatif)</span></label>
+            <input type="date" formControlName="dueDate"
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]" />
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+      <button
+        type="submit"
+        form="debt-form"
+        [disabled]="saving || debtForm.invalid"
+        class="flex-1 flex items-center justify-center gap-2 bg-[#0f766e] text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#0d6661] disabled:opacity-60 transition shadow-sm"
+      >
+        @if (saving) {
+          <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          Enregistrement…
+        } @else {
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          {{ activePanel === 'edit' ? 'Enregistrer' : 'Créer la dette' }}
+        }
+      </button>
+      <button type="button" (click)="closePanel()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+        Annuler
+      </button>
+    </div>
+  </aside>
+
+  <!-- Payment panel -->
+  <aside
+    class="fixed top-0 right-0 h-full w-[420px] bg-white shadow-2xl z-40 flex flex-col transition-transform duration-300 ease-in-out"
+    [class.translate-x-full]="!isPaymentFormOpen"
+    [class.translate-x-0]="isPaymentFormOpen"
+  >
+    @if (payingDebt) {
+      <!-- Find color for the paying debt -->
+      @for (debt of debts; track debt.id) {
+        @if (debt.id === payingDebt.id) {
+
+          <div class="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center" [class]="debtColor(debt).light">
+                <span class="material-symbols-outlined text-[20px]" [class]="debtColor(debt).text">payments</span>
+              </div>
+              <div>
+                <h3 class="font-bold text-slate-900 text-base leading-tight">Enregistrer un paiement</h3>
+                <p class="text-xs text-slate-400 mt-0.5 truncate max-w-[220px]">{{ payingDebt.creditorName }}</p>
+              </div>
+            </div>
+            <button (click)="closePanel()" class="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+              <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          </div>
+
+          <!-- Live repayment preview -->
+          <div class="mx-6 mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <div class="flex items-center gap-4 mb-3">
+              <!-- Projected gauge -->
+              <div class="relative w-14 h-14 flex-shrink-0">
+                <div
+                  class="w-14 h-14 rounded-full transition-all duration-300"
+                  [style.background]="'conic-gradient(' + debtColor(debt).hex + ' ' + projectedRepaidPercent(payingDebt) + '%, #e2e8f0 0)'"
+                ></div>
+                <div class="absolute inset-[5px] rounded-full bg-slate-50 flex items-center justify-center">
+                  <span class="text-[11px] font-bold" [class]="debtColor(debt).text">{{ projectedRepaidPercent(payingDebt) }}%</span>
+                </div>
+              </div>
+              <div class="flex-1 space-y-1">
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-500">Capital restant</span>
+                  <span class="font-bold text-slate-700">{{ formatAmount(payingDebt.remainingAmount) }}</span>
+                </div>
+                @if ((payAmount.value ?? 0) > 0) {
+                  <div class="flex justify-between text-xs">
+                    <span [class]="debtColor(debt).text">Après paiement</span>
+                    <span class="font-bold" [class]="debtColor(debt).text">{{ formatAmount(projectedRemaining(payingDebt)) }}</span>
+                  </div>
+                }
+                <div class="flex justify-between text-xs">
+                  <span class="text-slate-400">Mensualité habituelle</span>
+                  <span class="text-slate-500 font-medium">{{ formatAmount(payingDebt.monthlyPayment) }}</span>
+                </div>
+              </div>
+            </div>
+            <div class="h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-300"
+                [class]="debtColor(debt).bar"
+                [style.width.%]="projectedRepaidPercent(payingDebt)"
+              ></div>
+            </div>
+            @if ((payAmount.value ?? 0) > 0 && projectedRepaidPercent(payingDebt) >= 100) {
+              <p class="mt-2 text-xs text-center text-emerald-600 font-bold">🎉 Ce paiement solderait la dette !</p>
+            }
+          </div>
+
+        }
+      }
+
+      <div class="flex-1 overflow-y-auto px-6 py-5">
+        <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" novalidate id="payment-form" class="space-y-5">
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Montant (€) <span class="text-red-400">*</span></label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-semibold">€</span>
+              <input type="number" formControlName="amount" required min="0.01" step="0.01" placeholder="200"
+                class="w-full rounded-xl border pl-8 pr-4 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+                [class.border-red-400]="payAmount.invalid && payAmount.touched"
+                [class.border-slate-200]="!(payAmount.invalid && payAmount.touched)" />
+            </div>
+            @if (payAmount.touched && payAmount.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">error</span> Le montant est obligatoire.
+              </p>
+            }
+            @if (payAmount.touched && payAmount.hasError('min')) {
+              <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">error</span> Le montant doit être supérieur à 0.
+              </p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date du paiement <span class="text-red-400">*</span></label>
+            <input type="date" formControlName="paymentDate" required
+              class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]"
+              [class.border-red-400]="payDate.invalid && payDate.touched"
+              [class.border-slate-200]="!(payDate.invalid && payDate.touched)" />
+            @if (payDate.touched && payDate.hasError('required')) {
+              <p class="mt-1.5 text-xs text-red-500 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">error</span> La date est obligatoire.
+              </p>
+            }
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Note <span class="text-slate-300">(facultatif)</span></label>
+            <input type="text" formControlName="note" maxlength="300" placeholder="Mensualité, remboursement anticipé..."
+              class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm text-slate-800 placeholder-slate-300 outline-none transition focus:ring-2 focus:ring-[#0f766e]/20 focus:border-[#0f766e]" />
+          </div>
+
+        </form>
+      </div>
+
+      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex gap-3">
+        <button
+          type="submit"
+          form="payment-form"
+          [disabled]="saving || paymentForm.invalid"
+          class="flex-1 flex items-center justify-center gap-2 bg-[#0f766e] text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-[#0d6661] disabled:opacity-60 transition shadow-sm"
+        >
+          @if (saving) {
+            <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+            Enregistrement…
+          } @else {
+            <span class="material-symbols-outlined text-[18px]">payments</span>
+            Enregistrer le paiement
+          }
+        </button>
+        <button type="button" (click)="closePanel()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition">
+          Annuler
+        </button>
+      </div>
+    }
+  </aside>
+</div>

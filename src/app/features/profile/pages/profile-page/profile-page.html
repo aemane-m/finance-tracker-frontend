@@ -1,0 +1,145 @@
+<div class="min-h-screen bg-[#f6f6f8] text-slate-900">
+  <main class="max-w-[800px] mx-auto py-8 px-6 lg:px-8">
+
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Paramètres</h1>
+      <p class="text-slate-500 mt-1 text-sm font-medium">Gérez votre profil, votre mot de passe et vos sessions.</p>
+    </div>
+
+      <!-- Profile -->
+      <section class="mb-6">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <h2 class="text-base font-bold text-slate-800 mb-4">Informations personnelles</h2>
+
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-4 max-w-md">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Adresse email</label>
+              <input type="email" [value]="userEmail" readonly
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-100 text-slate-500 text-sm cursor-not-allowed" />
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" for="fullName">Nom complet</label>
+              <input id="fullName" type="text" formControlName="fullName" maxlength="100"
+                placeholder="Votre nom complet"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/50"
+                [class.border-red-400]="fullName.invalid && fullName.touched" />
+              @if (fullName.touched && fullName.hasError('required')) {
+                <p class="text-xs text-red-500">Le nom est obligatoire.</p>
+              }
+              @if (fullName.touched && fullName.hasError('maxlength')) {
+                <p class="text-xs text-red-500">100 caractères maximum.</p>
+              }
+            </div>
+
+            <button type="submit" [disabled]="savingProfile || profileForm.invalid"
+              class="bg-[#0f766e] hover:bg-[#0d6661] text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+              {{ savingProfile ? 'Enregistrement...' : 'Enregistrer' }}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Password -->
+      <section class="mb-6">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+          <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[#0f766e] text-lg">lock</span>
+            Modifier le mot de passe
+          </h2>
+
+          <form [formGroup]="passwordForm" (ngSubmit)="savePassword()" class="space-y-4 max-w-md">
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" for="newPassword">Nouveau mot de passe</label>
+              <input id="newPassword" type="password" formControlName="newPassword" minlength="8"
+                placeholder="••••••••"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/50"
+                [class.border-red-400]="newPassword.invalid && newPassword.touched" />
+              @if (newPassword.touched && newPassword.hasError('required')) {
+                <p class="text-xs text-red-500">Le mot de passe est obligatoire.</p>
+              }
+              @if (newPassword.touched && newPassword.hasError('minlength')) {
+                <p class="text-xs text-red-500">8 caractères minimum.</p>
+              }
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-bold text-slate-500 uppercase tracking-wider" for="confirmPassword">Confirmer</label>
+              <input id="confirmPassword" type="password" formControlName="confirmPassword"
+                placeholder="••••••••"
+                class="w-full px-3 py-2 rounded-lg border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f766e]/50"
+                [class.border-red-400]="confirmPassword.touched && passwordForm.hasError('passwordMismatch')" />
+              @if (confirmPassword.touched && confirmPassword.hasError('required')) {
+                <p class="text-xs text-red-500">La confirmation est obligatoire.</p>
+              }
+              @if (confirmPassword.touched && passwordForm.hasError('passwordMismatch')) {
+                <p class="text-xs text-red-500">Les mots de passe ne correspondent pas.</p>
+              }
+            </div>
+
+            <button type="submit" [disabled]="savingPassword || passwordForm.invalid"
+              class="bg-[#0f766e] hover:bg-[#0d6661] text-white font-semibold py-2 px-6 rounded-lg transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed">
+              {{ savingPassword ? 'Mise à jour...' : 'Mettre à jour' }}
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Sessions -->
+      <section class="mb-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-800 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#0f766e] text-lg">logout</span>
+              Se déconnecter de cet appareil
+            </h2>
+            <p class="text-sm text-slate-500 mt-1 max-w-md">Termine uniquement la session en cours. Vos autres appareils restent connectés.</p>
+          </div>
+          <button (click)="logoutHere()" [disabled]="loggingOutHere || loggingOutAll"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-semibold text-sm
+              hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+            @if (loggingOutHere) {
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+              Déconnexion…
+            } @else {
+              Se déconnecter
+            }
+          </button>
+        </div>
+      </section>
+
+      <!-- Logout all -->
+      <section class="mb-6">
+        <div class="bg-red-50 rounded-xl border border-red-200 shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h2 class="text-base font-bold text-red-700 flex items-center gap-2">
+              <span class="material-symbols-outlined text-red-500">security</span>
+              Déconnexion globale
+            </h2>
+            <p class="text-sm text-red-600/80 mt-1 max-w-md">Révoque toutes vos sessions actives sur tous vos appareils. À utiliser si votre compte est compromis.</p>
+          </div>
+          <button (click)="logoutAll()" [disabled]="loggingOutAll || loggingOutHere"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-sm
+              transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap">
+            @if (loggingOutAll) {
+              <svg class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+              </svg>
+              Révocation…
+            } @else {
+              Déconnecter partout
+            }
+          </button>
+        </div>
+      </section>
+
+  </main>
+
+  <footer class="py-6 px-10 text-center text-slate-400 text-xs border-t border-slate-200">
+    <p>© 2026 Finance Tracker. Tous droits réservés.</p>
+  </footer>
+</div>

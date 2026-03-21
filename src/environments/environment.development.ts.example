@@ -1,0 +1,8 @@
+// Copy this file to environment.development.ts and fill in your values.
+// environment.development.ts is gitignored — never commit real credentials.
+export const environment = {
+  production: false,
+  apiBaseUrl: 'http://localhost:8080/v1',
+  supabaseUrl: 'https://YOUR_PROJECT_REF.supabase.co',
+  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY'
+};

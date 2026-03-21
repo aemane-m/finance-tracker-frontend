@@ -1,0 +1,73 @@
+@if (totalPages > 1) {
+  <div class="flex items-center justify-between gap-4 py-3">
+
+    <!-- Range info -->
+    <p class="text-sm text-slate-500 shrink-0">
+      @if (totalElements > 0) {
+        <span class="font-medium text-slate-700">{{ rangeStart }}–{{ rangeEnd }}</span>
+        sur {{ totalElements | number }}
+      } @else {
+        0 résultat
+      }
+    </p>
+
+    <!-- Page controls -->
+    <nav class="flex items-center gap-1" aria-label="Pagination">
+
+      <!-- Previous -->
+      <button
+        (click)="goTo(page - 1)"
+        [disabled]="isFirst"
+        class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
+          disabled:opacity-40 disabled:cursor-not-allowed
+          enabled:hover:bg-slate-100 enabled:border-slate-200
+          disabled:border-slate-100 text-slate-600"
+        aria-label="Page précédente"
+      >
+        <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+        <span class="hidden sm:inline">Précédent</span>
+      </button>
+
+      <!-- Page numbers -->
+      <div class="flex items-center gap-1">
+        @for (item of pages; track $index) {
+          @if (isPageItem(item)) {
+            <button
+              (click)="goTo(item.value)"
+              class="min-w-[36px] h-9 px-2 rounded-lg text-sm font-medium transition-colors border"
+              [class.bg-[#0f766e]]="item.value === page"
+              [class.text-white]="item.value === page"
+              [class.border-[#0f766e]]="item.value === page"
+              [class.shadow-sm]="item.value === page"
+              [class.text-slate-600]="item.value !== page"
+              [class.border-transparent]="item.value !== page"
+              [class.hover:bg-slate-100]="item.value !== page"
+              [attr.aria-current]="item.value === page ? 'page' : null"
+            >
+              {{ item.value + 1 }}
+            </button>
+          } @else {
+            <span class="min-w-[36px] h-9 flex items-end justify-center pb-1 text-slate-400 text-base font-bold select-none">
+              &hellip;
+            </span>
+          }
+        }
+      </div>
+
+      <!-- Next -->
+      <button
+        (click)="goTo(page + 1)"
+        [disabled]="isLast"
+        class="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors
+          disabled:opacity-40 disabled:cursor-not-allowed
+          enabled:hover:bg-slate-100 enabled:border-slate-200
+          disabled:border-slate-100 text-slate-600"
+        aria-label="Page suivante"
+      >
+        <span class="hidden sm:inline">Suivant</span>
+        <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+      </button>
+
+    </nav>
+  </div>
+}
