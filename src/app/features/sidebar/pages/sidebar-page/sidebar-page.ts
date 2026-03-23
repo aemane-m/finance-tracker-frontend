@@ -107,6 +107,6 @@ export class AppSidebar implements OnInit {
     });
     if (!result.isConfirmed) return;
     await this.authService.signOut();
-    await this.router.navigate(['/login']);
+    await this.router.navigate(['/']);
   }
 }

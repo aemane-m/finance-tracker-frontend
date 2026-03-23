@@ -105,7 +105,7 @@ export class ProfilePage implements OnInit {
     if (!result.isConfirmed) return;
     this.loggingOutHere = true;
     await this.authService.signOut();
-    await this.router.navigate(['/login']);
+    await this.router.navigate(['/']);
   }
 
   async logoutAll(): Promise<void> {
@@ -124,7 +124,7 @@ export class ProfilePage implements OnInit {
     this.accountService.logoutAll().subscribe({
       next: async () => {
         await this.authService.signOut();
-        await this.router.navigate(['/login']);
+        await this.router.navigate(['/']);
       },
       error: async () => {
         this.loggingOutAll = false;

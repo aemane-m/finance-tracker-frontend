@@ -36,7 +36,7 @@ export class SecurityPage {
     this.accountService.logoutAll().subscribe({
       next: async () => {
         await this.authService.signOut();
-        await this.router.navigate(['/login']);
+        await this.router.navigate(['/']);
       },
       error: async () => {
         this.loggingOutAll = false;
@@ -65,6 +65,6 @@ export class SecurityPage {
 
     this.loggingOutHere = true;
     await this.authService.signOut();
-    await this.router.navigate(['/login']);
+    await this.router.navigate(['/']);
   }
 }

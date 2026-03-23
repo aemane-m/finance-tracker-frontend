@@ -36,7 +36,7 @@ export class CalendarPage implements OnInit {
   private calendarService = inject(CalendarService);
   private plannedService  = inject(PlannedTransactionsService);
   private fb = inject(FormBuilder);
-
+ 
   readonly weekDays = WEEK_DAYS;
 
   currentMonth: Dayjs = dayjs().startOf('month');
