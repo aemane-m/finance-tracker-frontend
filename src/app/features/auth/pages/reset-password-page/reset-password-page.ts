@@ -1,16 +1,10 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { supabase } from '../../../../core/auth/supabase.client';
+import { passwordMatchValidator } from '../../../../core/validators/custom-validators';
 import Swal from 'sweetalert2';
-
-function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password');
-  const confirm  = control.get('confirmPassword');
-  if (!password || !confirm) return null;
-  return password.value === confirm.value ? null : { passwordMismatch: true };
-}
 
 @Component({
   selector: 'app-reset-password-page',
@@ -28,7 +22,7 @@ export class ResetPasswordPage implements OnInit {
   form = this.fb.group({
     password:        ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', Validators.required],
-  }, { validators: passwordMatchValidator });
+  }, { validators: passwordMatchValidator() });
 
   get password()        { return this.form.controls.password; }
   get confirmPassword() { return this.form.controls.confirmPassword; }

@@ -11,10 +11,11 @@ import {
   CreatePlannedTransactionRequest,
   UpdatePlannedTransactionRequest,
 } from '../../models/planned-transaction.model';
-import { TransactionType, PlannedFrequency, Page } from '../../../../core/models/common.model';
+import { TransactionType, PlannedFrequency, Page, ApiError } from '../../../../core/models/common.model';
 import { CategoriesService } from '../../../categories/services/categories.service';
 import { Category } from '../../../categories/models/category.model';
 import { PaginationComponent } from '../../../../shared/components/pagination/pagination';
+import { HttpErrorResponse } from '@angular/common/http';
 
 type TabFilter = 'all' | 'EXPENSE' | 'INCOME';
 
@@ -57,13 +58,13 @@ export class PlannedPage implements OnInit {
   ];
 
   form = this.fb.group({
-    label:      ['', [Validators.required, Validators.maxLength(100)]],
-    amount:     [null as number | null, [Validators.required, Validators.min(0.01)]],
-    type:       ['EXPENSE' as TransactionType, [Validators.required]],
+    label:      this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(100)]),
+    amount:     this.fb.nonNullable.control(0, [Validators.required, Validators.min(0.01)]),
+    type:       this.fb.nonNullable.control('EXPENSE' as TransactionType, [Validators.required]),
     categoryId: [null as number | null, [Validators.required]],
-    frequency:  ['MONTHLY' as PlannedFrequency, [Validators.required]],
-    nextDueDate:['', [Validators.required]],
-    autoCreate: [false],
+    frequency:  this.fb.nonNullable.control('MONTHLY' as PlannedFrequency, [Validators.required]),
+    nextDueDate:this.fb.nonNullable.control('', [Validators.required]),
+    autoCreate: this.fb.nonNullable.control(false),
   });
 
   get label()       { return this.form.controls.label; }
@@ -76,6 +77,12 @@ export class PlannedPage implements OnInit {
   get filteredPlanned(): PlannedWithRuns[] {
     if (this.activeTab === 'all') return this.planned;
     return this.planned.filter(p => p.type === this.activeTab);
+  }
+
+  get upcomingPlanned(): PlannedWithRuns | null {
+    if (this.filteredPlanned.length === 0) return null;
+    return [...this.filteredPlanned]
+      .sort((a, b) => a.nextDueDate.localeCompare(b.nextDueDate))[0] ?? null;
   }
 
   get totalActiveExpense(): number {
@@ -225,6 +232,7 @@ export class PlannedPage implements OnInit {
       next: run => {
         this.running = null;
         if (run.status === 'SUCCESS') {
+          this.loadAll();
           Swal.fire({ icon: 'success', title: 'Transaction créée', timer: 1500, showConfirmButton: false });
         } else {
           Swal.fire({ icon: 'error', title: 'Échec', text: run.errorMessage ?? 'Erreur lors de l\'exécution.', confirmButtonColor: '#0f766e' });
@@ -242,7 +250,7 @@ export class PlannedPage implements OnInit {
     this.editingId = null;
     this.form.reset({
       label: '',
-      amount: null,
+      amount: 0,
       type: 'EXPENSE',
       categoryId: null,
       frequency: 'MONTHLY',
@@ -275,15 +283,15 @@ export class PlannedPage implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving = true;
 
-    const v = this.form.value;
+    const v = this.form.getRawValue();
     const base = {
       label:       v.label!,
       amount:      v.amount!,
       type:        v.type! as TransactionType,
-      categoryId:  v.categoryId!,
+      categoryId:  Number(v.categoryId),
       frequency:   v.frequency! as PlannedFrequency,
       nextDueDate: v.nextDueDate!,
-      autoCreate:  v.autoCreate ?? false,
+      autoCreate:  !!v.autoCreate,
     };
 
     const isEditing = this.editingId !== null;
@@ -298,9 +306,15 @@ export class PlannedPage implements OnInit {
         this.loadAll();
         Swal.fire({ icon: 'success', title: isEditing ? 'Transaction mise à jour' : 'Transaction créée', timer: 1500, showConfirmButton: false });
       },
-      error: () => {
+      error: (err: HttpErrorResponse) => {
         this.saving = false;
-        Swal.fire({ icon: 'error', title: 'Erreur', text: 'Impossible d\'enregistrer.', confirmButtonColor: '#0f766e' });
+        const apiError = err.error as Partial<ApiError> | null;
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: apiError?.message || 'Impossible d\'enregistrer.',
+          confirmButtonColor: '#0f766e'
+        });
       },
     });
   }

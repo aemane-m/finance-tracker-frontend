@@ -20,12 +20,7 @@ import {
 } from '../../models/dashboard.model';
 import { Page } from '../../../../core/models/common.model';
 
-const DONUT_COLORS = [
-  '#0f766e', '#6366f1', '#f59e0b', '#ef4444',
-  '#8b5cf6', '#0ea5e9', '#10b981', '#f97316',
-];
-
-const GOAL_COLORS = [
+const CHART_COLORS = [
   '#0f766e', '#6366f1', '#f59e0b', '#ef4444',
   '#8b5cf6', '#0ea5e9', '#10b981', '#f97316',
 ];
@@ -74,7 +69,7 @@ export class DashboardPage implements OnInit {
     let deg = 0;
     const stops = this.spending.map((item, i) => {
       const end = deg + (Number(item.amount) / total) * 360;
-      const s = `${DONUT_COLORS[i % DONUT_COLORS.length]} ${deg.toFixed(2)}deg ${end.toFixed(2)}deg`;
+      const s = `${CHART_COLORS[i % CHART_COLORS.length]} ${deg.toFixed(2)}deg ${end.toFixed(2)}deg`;
       deg = end;
       return s;
     });
@@ -278,7 +273,7 @@ export class DashboardPage implements OnInit {
     return Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100));
   }
 
-  goalColor(i: number): string { return GOAL_COLORS[i % GOAL_COLORS.length]; }
+  goalColor(i: number): string { return CHART_COLORS[i % CHART_COLORS.length]; }
 
   private isOver(a: BudgetAlert): boolean {
     return a.overBudget === true;
@@ -301,7 +296,7 @@ export class DashboardPage implements OnInit {
       : `${pct.toFixed(0)}% du budget mensuel utilisé.`;
   }
 
-  dotColor(i: number): string { return DONUT_COLORS[i % DONUT_COLORS.length]; }
+  dotColor(i: number): string { return CHART_COLORS[i % CHART_COLORS.length]; }
 
   txAmountClass(tx: Transaction): string { return tx.type === 'INCOME' ? 'text-emerald-500 font-bold' : 'text-rose-500 font-bold'; }
   txAmountText(tx: Transaction):  string {

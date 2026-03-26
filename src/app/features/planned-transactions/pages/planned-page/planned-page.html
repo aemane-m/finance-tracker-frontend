@@ -60,9 +60,9 @@
             </div>
             <p class="text-xs font-bold text-amber-50 uppercase tracking-widest">Prochaine échéance</p>
           </div>
-          @if (filteredPlanned.length > 0) {
-            <p class="text-xl font-black text-white truncate">{{ filteredPlanned[0].label }}</p>
-            <p class="text-xs text-amber-100 mt-1">{{ formatDate(filteredPlanned[0].nextDueDate) }}</p>
+          @if (upcomingPlanned) {
+            <p class="text-xl font-black text-white truncate">{{ upcomingPlanned.label }}</p>
+            <p class="text-xs text-amber-100 mt-1">{{ formatDate(upcomingPlanned.nextDueDate) }}</p>
           } @else {
             <p class="text-2xl font-black text-white/60">—</p>
             <p class="text-xs text-amber-100 mt-1">Aucune planification</p>
@@ -453,9 +453,9 @@
             [class.border-rose-400]="categoryId.invalid && categoryId.touched"
             [class.border-slate-200]="!(categoryId.invalid && categoryId.touched)"
           >
-            <option [value]="null" disabled>Choisir une catégorie</option>
+            <option [ngValue]="null" disabled>Choisir une catégorie</option>
             @for (cat of categories; track cat.id) {
-              <option [value]="cat.id">{{ cat.name }}</option>
+              <option [ngValue]="cat.id">{{ cat.name }}</option>
             }
           </select>
           @if (categoryId.touched && categoryId.hasError('required')) {

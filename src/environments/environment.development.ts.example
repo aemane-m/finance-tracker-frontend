@@ -1,5 +1,6 @@
-// Copy this file to environment.development.ts and fill in your values.
-// environment.development.ts is gitignored — never commit real credentials.
+// Example development environment.
+// The repository already contains a runnable development environment file.
+// Use this template if you want to replace it locally with your own values.
 export const environment = {
   production: false,
   apiBaseUrl: 'http://localhost:8080/v1',

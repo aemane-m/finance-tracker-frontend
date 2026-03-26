@@ -103,11 +103,6 @@ export const routes: Routes = [
             .then(m => m.ProfilePage)
       },
       {
-        path: 'security',
-        redirectTo: 'profile',
-        pathMatch: 'full',
-      },
-      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full'

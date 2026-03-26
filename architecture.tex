@@ -1,0 +1,1258 @@
+\documentclass[12pt,a4paper]{article}
+
+% ── Encodage & langue ───────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+
+% ── Mise en page ────────────────────────────────────────────────────────────
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+\usepackage{parskip}
+\setlength{\parindent}{0pt}
+
+% ── Typographie ─────────────────────────────────────────────────────────────
+\usepackage{lmodern}
+\usepackage{microtype}
+\setlength{\emergencystretch}{50pt}  % absorbe les dépassements de \texttt{}
+
+% ── Couleurs & liens ────────────────────────────────────────────────────────
+\usepackage[dvipsnames,svgnames]{xcolor}
+\definecolor{primary}{HTML}{0f766e}
+\definecolor{codebg}{HTML}{f6f8fa}
+\definecolor{codefg}{HTML}{24292e}
+\definecolor{linkcol}{HTML}{0f766e}
+
+\usepackage[
+  colorlinks=true,
+  linkcolor=linkcol,
+  urlcolor=linkcol,
+  citecolor=linkcol,
+  bookmarks=true,
+  pdfauthor={Finance Tracker},
+  pdftitle={Architecture du frontend Angular -- Finance Tracker}
+]{hyperref}
+
+% ── Code ────────────────────────────────────────────────────────────────────
+\usepackage{listings}
+\lstdefinelanguage{TypeScript}{
+  keywords={import,export,from,class,interface,type,const,let,var,function,return,
+            if,else,for,while,switch,case,break,continue,new,this,super,extends,
+            implements,async,await,true,false,null,undefined,void,number,string,
+            boolean,any,never,unknown,readonly,private,public,protected,static,
+            abstract,enum,namespace,module,declare,as,in,of,default,throw,try,
+            catch,finally,delete,typeof,instanceof,keyof,Partial,Pick,Omit,
+            Observable,Promise,inject,Component,Injectable,OnInit,Input,Output},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  string=[b]",
+  morestring=[b]',
+  morestring=[b]`,
+}
+\lstset{
+  language=TypeScript,
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\footnotesize,
+  keywordstyle=\color{primary}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{BrickRed},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=8pt,
+  tabsize=2,
+  showstringspaces=false,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!30},
+  xleftmargin=1.5em,
+  framexleftmargin=1.5em,
+  captionpos=b,
+}
+\lstdefinestyle{shell}{
+  language=bash,
+  backgroundcolor=\color{black!88},
+  basicstyle=\ttfamily\small\color{white},
+  keywordstyle=\color{white},
+  commentstyle=\color{gray!60},
+  stringstyle=\color{white},
+  numbers=none,
+  frame=none,
+  xleftmargin=0pt,
+  framexleftmargin=0pt,
+}
+
+% ── Tableaux ────────────────────────────────────────────────────────────────
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+% ── Titres ──────────────────────────────────────────────────────────────────
+\usepackage{titlesec}
+\titleformat{\section}
+  {\Large\bfseries\color{primary}}
+  {\thesection}{1em}{}[\color{primary}\titlerule]
+\titleformat{\subsection}
+  {\large\bfseries\color{codefg}}
+  {\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\normalsize\bfseries\color{codefg}}
+  {\thesubsubsection}{1em}{}
+
+% ── Divers ──────────────────────────────────────────────────────────────────
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{fancybox}
+\usepackage{mdframed}
+
+\mdfdefinestyle{infobox}{
+  backgroundcolor=primary!8,
+  linecolor=primary,
+  linewidth=1pt,
+  leftmargin=0pt, rightmargin=0pt,
+  innerleftmargin=10pt, innerrightmargin=10pt,
+  innertopmargin=8pt, innerbottommargin=8pt,
+}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textcolor{gray}{\small Finance Tracker -- Architecture Frontend}}
+\lhead{\textcolor{gray}{\small Angular 21 + Supabase + Spring Boot}}
+\rfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ── Page de garde ───────────────────────────────────────────────────────────
+\title{
+  \vspace{-1cm}
+  {\color{primary}\rule{\linewidth}{2pt}}\\[0.5cm]
+  {\LARGE\bfseries Finance Tracker}\\[0.3cm]
+  {\large\bfseries Architecture du Frontend Angular}\\[0.2cm]
+  {\normalsize Documentation technique complète}\\[0.5cm]
+  {\color{primary}\rule{\linewidth}{2pt}}
+}
+\author{}
+\date{\today}
+
+% ════════════════════════════════════════════════════════════════════════════
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\tableofcontents
+\newpage
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Vue d'ensemble}
+
+Finance Tracker est une application de gestion de finances personnelles.
+Le \textbf{frontend} est une Single Page Application (SPA) construite avec
+\textbf{Angular 21}, qui consomme une API REST exposée par un backend
+\textbf{Spring Boot} et délègue l'authentification à \textbf{Supabase Auth}.
+
+\subsection{Stack technique}
+
+\begin{center}
+\begin{tabular}{L{4cm} L{9cm}}
+\toprule
+\textbf{Technologie} & \textbf{Rôle} \\
+\midrule
+Angular 21 & Framework SPA, standalone components, lazy loading \\
+TypeScript strict & Typage statique complet, aucun \texttt{any} autorisé \\
+Angular Router & Navigation côté client, guards, lazy routes \\
+Angular HttpClient & Requêtes HTTP, intercepteurs \\
+Angular Reactive Forms & Formulaires typés avec validation \\
+RxJS & Programmation réactive (Observables) \\
+Supabase JS SDK & Authentification côté client \\
+Tailwind CSS 4 & Utilitaires CSS \\
+chart.js + ng2-charts & Graphique linéaire du tableau de bord \\
+SweetAlert2 & Boîtes de dialogue et alertes \\
+dayjs & Manipulation des dates \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Périmètre fonctionnel}
+
+L'application couvre sept domaines métier :
+
+\begin{itemize}[itemsep=2pt]
+  \item \textbf{Transactions} -- saisie, filtrage, recherche, pagination
+  \item \textbf{Catégories} -- gestion des catégories revenus/dépenses
+  \item \textbf{Budgets} -- plafonds mensuels par catégorie avec alertes
+  \item \textbf{Objectifs} -- épargne progressive avec historique des contributions
+  \item \textbf{Dettes} -- suivi du remboursement avec historique des paiements
+  \item \textbf{Transactions planifiées} -- récurrences automatisées
+  \item \textbf{Calendrier} -- vue mensuelle avec projection des récurrences
+  \item \textbf{Import / Export} -- CSV bidirectionnel
+  \item \textbf{Tableau de bord} -- agrégats et visualisations
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Structure des répertoires}
+
+Le projet suit une architecture en quatre couches :
+\texttt{core}, \texttt{shared}, \texttt{layout}, \texttt{features}.
+
+\begin{lstlisting}[language=bash, numbers=none, frame=none, backgroundcolor=\color{codebg}, basicstyle=\ttfamily\small\color{codefg}]
+src/app/
+  app.ts                       # Composant racine
+  app.config.ts                # Configuration applicative (providers)
+  app.routes.ts                # Définition des routes
+
+  core/                        # Infrastructure transverse
+    auth/
+      supabase.client.ts       # Client Supabase (singleton)
+    guards/
+      auth-guard.ts            # Protège les routes privées
+      guest-guard.ts           # Bloque un user connecté sur /login
+    interceptors/
+      auth.interceptor.ts      # Injecte le Bearer token
+    models/
+      common.model.ts          # Types partagés (Page<T>, ApiError, enums)
+    services/
+      auth.service.ts          # Gestion de la session Supabase
+      account.service.ts       # Déconnexion globale (logout-all)
+    validators/
+      custom-validators.ts     # passwordMatchValidator (factory)
+
+  shared/                      # Composants UI réutilisables
+    components/
+      pagination/              # PaginationComponent (Spring Page)
+
+  layout/                      # Conteneurs visuels
+    main-layout/               # Sidebar + router-outlet
+
+  features/                    # Domaines métier
+    landing/                   # Page d'accueil publique
+    auth/                      # login, signup, forgot-password, reset-password
+    dashboard/                 # Tableau de bord
+    transactions/              # CRUD transactions
+    categories/                # CRUD catégories
+    budgets/                   # CRUD budgets
+    goals/                     # Objectifs + contributions
+    debts/                     # Dettes + paiements
+    planned-transactions/      # Récurrences + runs
+    calendar/                  # Calendrier mensuel
+    import-export/             # Import/export CSV
+    profile/                   # Profil utilisateur
+    sidebar/                   # Composant navigation (AppSidebar)
+\end{lstlisting}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Configuration applicative (\texttt{app.config.ts})}
+
+Angular 21 n'utilise plus de \texttt{NgModule} racine.
+La configuration est déclarative dans \texttt{app.config.ts} :
+
+\begin{lstlisting}
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([authInterceptor])),
+    provideCharts(withDefaultRegisterables()),
+  ]
+};
+\end{lstlisting}
+
+\begin{itemize}
+  \item \texttt{provideZoneChangeDetection} -- active la détection de changements avec
+        coalescing (une seule passe par macro-tâche au lieu d'une par événement).
+  \item \texttt{provideRouter(routes)} -- enregistre les routes avec lazy loading.
+  \item \texttt{provideHttpClient(withInterceptors([...]))} -- configure
+        \texttt{HttpClient} en mode standalone et branche \texttt{authInterceptor}
+        sur \textbf{toutes} les requêtes HTTP sortantes.
+  \item \texttt{provideCharts} -- enregistre les composants chart.js nécessaires
+        à \texttt{ng2-charts}.
+  \item Tous les services métier utilisent \texttt{providedIn: 'root'} : ils sont
+        des \textbf{singletons} créés à la demande par l'injecteur Angular.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Routage (\texttt{app.routes.ts})}
+
+\subsection{Routes publiques}
+
+\begin{center}
+\begin{tabular}{L{5cm} L{6cm} L{3cm}}
+\toprule
+\textbf{URL} & \textbf{Composant} & \textbf{Guard} \\
+\midrule
+\texttt{/} & \texttt{LandingPage} & -- \\
+\texttt{/login} & \texttt{LoginPage} & \texttt{guestGuard} \\
+\texttt{/signup} & \texttt{SignupPage} & \texttt{guestGuard} \\
+\texttt{/forgot-password} & \texttt{ForgotPasswordPage} & \texttt{guestGuard} \\
+\texttt{/reset-password} & \texttt{ResetPasswordPage} & -- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Routes privées}
+
+Toutes sous \texttt{/app}, encapsulées dans \texttt{MainLayout} et
+protégées par \texttt{authGuard} :
+
+\begin{center}
+\begin{tabular}{L{6cm} L{7.5cm}}
+\toprule
+\textbf{URL} & \textbf{Composant} \\
+\midrule
+\texttt{/app/dashboard} & \texttt{DashboardPage} \\
+\texttt{/app/transactions} & \texttt{TransactionsPage} \\
+\texttt{/app/categories} & \texttt{CategoriesPage} \\
+\texttt{/app/budgets} & \texttt{BudgetsPage} \\
+\texttt{/app/goals} & \texttt{GoalsPage} \\
+\texttt{/app/debts} & \texttt{DebtsPage} \\
+\texttt{/app/planned} & \texttt{PlannedPage} \\
+\texttt{/app/calendar} & \texttt{CalendarPage} \\
+\texttt{/app/import-export} & \texttt{ImportExportPage} \\
+\texttt{/app/profile} & \texttt{ProfilePage} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Chaque route utilise \texttt{loadComponent()} : le bundle JavaScript du composant
+est téléchargé \textbf{uniquement} lorsque l'utilisateur accède à la page
+(\textit{lazy loading}).
+
+\begin{lstlisting}
+{
+  path: 'transactions',
+  loadComponent: () =>
+    import('./features/transactions/pages/transactions-page/transactions-page')
+      .then(m => m.TransactionsPage)
+}
+\end{lstlisting}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Couche Core -- Infrastructure}
+
+\subsection{Client Supabase (\texttt{supabase.client.ts})}
+
+Le client Supabase est instancié \textbf{une seule fois} au démarrage de l'app,
+avec la clé publique \texttt{anon} (jamais la \texttt{service\_role}) :
+
+\begin{lstlisting}
+export const supabase = createClient(
+  environment.supabaseUrl,
+  environment.supabaseAnonKey,
+  {
+    auth: {
+      lock: (_name, _timeout, fn) => fn(),
+    },
+  }
+);
+\end{lstlisting}
+
+L'option \texttt{lock} désactive le verrou interne de Supabase, qui utilise
+normalement la Web Locks API (\texttt{navigator.locks}). Cela permet à
+\texttt{AuthService} de lire la session de façon \textbf{synchrone} depuis
+le cache, sans attendre une Promise à chaque requête HTTP.
+
+\subsection{Service d'authentification (\texttt{auth.service.ts})}
+
+\begin{lstlisting}
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private session$ = new BehaviorSubject<Session | null>(null);
+  private initialized = false;
+
+  constructor(private zone: NgZone) {
+    supabase.auth.getSession().then(({ data }) => {
+      this.session$.next(data.session);
+      this.initialized = true;
+    });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      this.zone.run(() => this.session$.next(session));
+    });
+  }
+
+  getAccessToken(): string | null {
+    return this.session$.value?.access_token ?? null;
+  }
+
+  isAuthenticated(): boolean {
+    return this.session$.value !== null;
+  }
+}
+\end{lstlisting}
+
+\textbf{Mécanismes clés :}
+\begin{itemize}
+  \item \texttt{BehaviorSubject<Session | null>} -- émet la session courante à chaque
+        changement ; valeur initiale \texttt{null} (non connecté).
+  \item \texttt{waitForInit()} -- les guards attendent que \texttt{getSession()} ait
+        répondu avant de décider si l'utilisateur est authentifié.
+  \item \texttt{getAccessToken()} -- lecture \textbf{synchrone} du token depuis
+        \texttt{BehaviorSubject.value}. Supabase met à jour le cache localement ;
+        l'intercepteur n'a pas besoin de souscrire à un Observable.
+  \item \texttt{NgZone.run()} -- les événements Supabase arrivent hors de la zone
+        Angular ; cette ligne force la détection de changements lors du changement
+        de session.
+\end{itemize}
+
+\subsection{Garde d'authentification (\texttt{auth-guard.ts})}
+
+\begin{lstlisting}
+export const authGuard: CanActivateFn = async () => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
+  await auth.waitForInit();
+  if (!auth.isAuthenticated())
+    return router.createUrlTree(['/login']);
+  return true;
+};
+\end{lstlisting}
+
+Appliqué au groupe de routes \texttt{/app/**}. Si la session n'est pas encore chargée
+au démarrage (premier chargement de l'app), le guard \textbf{attend} la résolution
+de \texttt{waitForInit()} avant de statuer.
+
+\subsection{Garde invité (\texttt{guest-guard.ts})}
+
+Empêche un utilisateur \textbf{déjà connecté} d'accéder à \texttt{/login} ou
+\texttt{/signup}. Il est redirigé vers \texttt{/app/dashboard}.
+
+\begin{lstlisting}
+export const guestGuard: CanActivateFn = async () => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
+  await auth.waitForInit();
+  if (auth.isAuthenticated())
+    return router.createUrlTree(['/app/dashboard']);
+  return true;
+};
+\end{lstlisting}
+
+\subsection{Intercepteur HTTP (\texttt{auth.interceptor.ts})}
+
+\begin{lstlisting}
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).getAccessToken();
+  if (!token) return next(req);
+  return next(req.clone({
+    setHeaders: { Authorization: `Bearer ${token}` }
+  }));
+};
+\end{lstlisting}
+
+\textbf{Fonctionnement :}
+\begin{enumerate}
+  \item Chaque requête HTTP passe par cet intercepteur (enregistré globalement).
+  \item Le token JWT est lu \textbf{synchronement} depuis le cache d'AuthService.
+  \item Si un token existe, la requête est clonée (immuabilité) avec l'en-tête
+        \texttt{Authorization: Bearer <token>}.
+  \item Si aucun token n'existe (utilisateur non connecté), la requête passe telle quelle.
+  \item Le backend Spring Boot valide ce JWT sur toutes les routes protégées.
+\end{enumerate}
+
+\subsection{Architecture du backend vue depuis le frontend}
+
+Même si ce dépôt contient uniquement le frontend Angular, le contrat HTTP et les
+types manipulés permettent de reconstituer précisément la \textbf{chaîne de traitement}
+côté backend. Le modèle le plus cohérent avec les endpoints utilisés est une
+architecture Spring Boot classique en couches :
+
+\begin{center}
+\begin{tabularx}{\linewidth}{L{3.2cm} X}
+\toprule
+\textbf{Couche backend} & \textbf{Responsabilité} \\
+\midrule
+Security filter chain & Intercepte la requête entrante, lit l'en-tête
+\texttt{Authorization}, valide le JWT Supabase, refuse la requête si le token
+est absent ou invalide sur une route protégée. \\
+\midrule
+Controller REST & Expose les routes \texttt{/v1/**}, reçoit le JSON, valide les
+données entrantes, convertit la requête HTTP en appel métier. \\
+\midrule
+Service métier & Porte les règles métier : création, recherche, contrôle des
+droits, calculs, déclenchement d'actions liées, orchestration entre plusieurs
+repositories si nécessaire. \\
+\midrule
+Repository / persistance & Charge et sauvegarde les entités en base, applique les
+filtres, tris, paginations et recherches demandés par le service. \\
+\midrule
+DTO / sérialisation & Transforme les objets métier en JSON de réponse stable pour
+le frontend : listes, pages, messages d'erreur, statuts, enums. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\textbf{Chaîne complète d'une requête protégée :}
+\begin{enumerate}
+  \item Le frontend appelle un endpoint via \texttt{HttpClient}.
+  \item L'intercepteur Angular ajoute le \texttt{Bearer token}.
+  \item Spring Security intercepte la requête avant le contrôleur.
+  \item Le JWT est vérifié ; l'identité utilisateur est extraite du token.
+  \item Le contrôleur appelle le service du domaine concerné.
+  \item Le service applique les règles métier et utilise un ou plusieurs repositories.
+  \item Les données sont relues ou persistées en base.
+  \item Le backend construit la réponse JSON finale et renvoie le code HTTP adapté
+        (\texttt{200}, \texttt{201}, \texttt{204}, \texttt{400}, \texttt{401}, etc.).
+\end{enumerate}
+
+\textbf{Point important :} le frontend \textbf{n'envoie jamais l'identité utilisateur}
+dans ses payloads métier. Le backend relie chaque opération au bon utilisateur à
+partir du JWT validé. Cette décision simplifie le contrat, réduit le risque
+d'usurpation et garantit que les données lues ou modifiées appartiennent bien
+à la session authentifiée.
+
+\subsection{Comment les éléments backend sont reliés entre eux}
+
+Les routes visibles dans le frontend montrent une séparation nette par domaine.
+Chaque domaine est très probablement raccordé à un ensemble cohérent de classes
+backend reliées entre elles :
+
+\begin{itemize}
+  \item \textbf{Transactions} : un contrôleur reçoit les CRUD et recherches, un
+        service applique les règles de création/mise à jour, puis un repository
+        persiste les lignes de transaction.
+  \item \textbf{Catégories} : les transactions référencent une catégorie ; le
+        backend doit donc garantir qu'une catégorie utilisée appartient au même
+        utilisateur et reste cohérente avec le type revenu/dépense.
+  \item \textbf{Budgets} : les budgets sont liés aux catégories et à une période.
+        Le backend agrège ou compare les transactions du mois avec les plafonds.
+  \item \textbf{Objectifs} et \textbf{dettes} : chaque entité principale possède un
+        historique paginé (\texttt{GoalContribution}, \texttt{DebtPayment}), ce qui
+        implique un lien parent-enfants côté persistance et des services capables
+        de recalculer les soldes après chaque mouvement.
+  \item \textbf{Transactions planifiées} : elles produisent des exécutions
+        (\texttt{PlannedTransaction}\allowbreak\texttt{Run}) et sont connectées au calendrier ainsi qu'au
+        flux transactionnel réel lorsqu'une occurrence est lancée.
+  \item \textbf{Calendrier} : il agrège les événements mensuels visibles dans l'UI ;
+        il dépend donc soit de ses propres données, soit de projections calculées à
+        partir des transactions planifiées.
+  \item \textbf{Compte / sécurité} : \texttt{/account/logout-all} ne manipule pas les
+        données métier ; il s'appuie sur l'identité extraite du token pour invalider
+        les sessions côté serveur.
+\end{itemize}
+
+En pratique, la liaison entre ces éléments suit presque toujours le même axe :
+\textbf{Controller} $\rightarrow$ \textbf{Service} $\rightarrow$ \textbf{Repository}
+$\rightarrow$ \textbf{base de données}, puis la réponse remonte en sens inverse.
+Le frontend ne connaît que le \textbf{contrat HTTP} ; tout le reste est encapsulé
+dans le backend, ce qui permet de faire évoluer la logique métier sans casser
+l'interface Angular tant que les DTO restent compatibles.
+
+\subsection{Modèles partagés (\texttt{common.model.ts})}
+
+\begin{lstlisting}
+// Types union -- correspondent aux enums backend
+export type TransactionType   = 'INCOME' | 'EXPENSE';
+export type PlannedFrequency  = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type GoalStatus        = 'ACTIVE' | 'COMPLETED' | 'ARCHIVED';
+export type DebtStatus        = 'ACTIVE' | 'PAID' | 'CANCELLED';
+export type PlannedRunStatus  = 'SUCCESS' | 'FAILED';
+
+// Modèle d'erreur standardisé retourné par le backend
+export interface ApiError {
+  timestamp: string;
+  status: number;
+  error: string;
+  message: string;
+  path: string;
+  details?: string[];
+}
+
+// Pagination Spring (page 0-indexée)
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;  // page courante (0-based)
+  size: number;
+}
+\end{lstlisting}
+
+\subsection{Validateur custom (\texttt{custom-validators.ts})}
+
+Factory de validateur Angular utilisée sur les formulaires de changement de mot de passe :
+
+\begin{lstlisting}
+export function passwordMatchValidator(
+  passwordField = 'password',
+  confirmField  = 'confirmPassword',
+): ValidatorFn {
+  return (ctrl: AbstractControl): ValidationErrors | null => {
+    const pw  = ctrl.get(passwordField)?.value;
+    const cpw = ctrl.get(confirmField)?.value;
+    return pw && cpw && pw !== cpw ? { passwordMismatch: true } : null;
+  };
+}
+\end{lstlisting}
+
+C'est une \textbf{factory} (fonction qui retourne un \texttt{ValidatorFn}) afin de
+configurer les noms des champs à comparer selon le formulaire :
+\begin{itemize}
+  \item \texttt{signup-page} et \texttt{reset-password-page} : champs \texttt{password}
+        + \texttt{confirmPassword} (valeurs par défaut)
+  \item \texttt{profile-page} : champs \texttt{newPassword} + \texttt{confirmPassword}
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Couche Shared -- Composants réutilisables}
+
+\subsection{PaginationComponent}
+
+Composant générique de pagination qui consomme le format \texttt{Page<T>} de Spring :
+
+\begin{lstlisting}
+@Component({ selector: 'app-pagination', standalone: true, ... })
+export class PaginationComponent {
+  @Input() page         = 0;          // 0-based (Spring)
+  @Input() totalPages   = 0;
+  @Input() totalElements = 0;
+  @Input() size         = 20;
+  @Output() pageChange  = new EventEmitter<number>();
+}
+\end{lstlisting}
+
+\textbf{Comportement :}
+\begin{itemize}
+  \item Affiche \og N--M sur TOTAL \fg{} (converti en 1-based pour l'utilisateur).
+  \item Génère une liste intelligente de boutons de page : toujours les 2 premières
+        et les 2 dernières pages, plus une fenêtre de 2 pages autour de la page courante.
+  \item Insère des points de suspension (\texttt{...}) lorsqu'il y a un saut.
+  \item Boutons Précédent / Suivant désactivés aux extrémités.
+  \item Émet l'événement \texttt{pageChange} sur sélection d'une page.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Couche Layout}
+
+\subsection{MainLayout}
+
+Conteneur de toutes les pages privées (\texttt{/app/**}) :
+
+\begin{lstlisting}
+@Component({
+  selector: 'app-main-layout',
+  standalone: true,
+  imports: [RouterOutlet, AppSidebar],
+})
+export class MainLayout {}
+\end{lstlisting}
+
+Le template positionne la sidebar à gauche (largeur fixe 256 px) et le
+contenu principal à droite :
+
+\begin{lstlisting}[language=html, numbers=none]
+<div class="flex min-h-screen bg-[#f6f6f8]">
+  <app-sidebar />
+  <div class="ml-64 flex-1">
+    <router-outlet />
+  </div>
+</div>
+\end{lstlisting}
+
+\subsection{AppSidebar (\texttt{features/sidebar/})}
+
+Composant de navigation latérale chargé par \texttt{MainLayout}.
+
+\textbf{Structure de la navigation (sections)} :
+\begin{itemize}
+  \item \textit{Vue d'ensemble} : Tableau de bord, Transactions, Planifiées
+  \item \textit{Gestion} : Catégories, Budgets, Objectifs, Dettes
+  \item \textit{Outils} : Calendrier, Import / Export
+  \item \textit{Compte} : Paramètres (profile)
+\end{itemize}
+
+\textbf{Fonctionnalités :}
+\begin{itemize}
+  \item Affiche le nom complet et les initiales de l'utilisateur (lues depuis les
+        métadonnées Supabase).
+  \item Menu déroulant utilisateur fermé par \texttt{HostListener('document:click')}.
+  \item Déconnexion locale via SweetAlert2 $\to$ \texttt{authService.signOut()} $\to$
+        redirection vers \texttt{/}.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Couche Features -- Services et modèles par domaine}
+
+Chaque domaine métier suit la même organisation :
+\begin{lstlisting}[language=bash, numbers=none, frame=none, backgroundcolor=\color{codebg}, basicstyle=\ttfamily\small\color{codefg}]
+features/<domaine>/
+  models/<domaine>.model.ts    # Interfaces TypeScript
+  services/<domaine>.service.ts # Appels HTTP
+  pages/<domaine>-page/
+    <domaine>-page.ts          # Logique du composant
+    <domaine>-page.html        # Template
+    <domaine>-page.css/scss
+\end{lstlisting}
+
+\subsection{Transactions}
+
+\subsubsection{Modèles}
+
+\begin{lstlisting}
+export interface Transaction {
+  id: number;         label: string;      amount: number;
+  type: TransactionType;  categoryId: number; date: string; // YYYY-MM-DD
+  note?: string | null;   source?: string | null;
+  createdAt: string;      updatedAt?: string | null;
+}
+
+export interface CreateTransactionRequest {
+  amount: number;   type: TransactionType;  categoryId: number;
+  label: string;    date: string;           note?: string | null;
+}
+
+export interface TransactionSearchParams {
+  type?: TransactionType;  categoryId?: number;
+  startDate?: string;      endDate?: string;    label?: string;
+}
+\end{lstlisting}
+
+\subsubsection{Service}
+
+\begin{lstlisting}
+@Injectable({ providedIn: 'root' })
+export class TransactionsService {
+  private base = `${environment.apiBaseUrl}/transactions`;
+
+  getAll(page = 0, size = 200): Observable<Page<Transaction>>
+  search(params: TransactionSearchParams, page = 0, size = 200):
+      Observable<Page<Transaction>>
+  create(payload: CreateTransactionRequest): Observable<Transaction>
+  update(id: number, payload: UpdateTransactionRequest): Observable<Transaction>
+  delete(id: number): Observable<void>
+}
+\end{lstlisting}
+
+\subsubsection{Page}
+
+Charge \textbf{toutes} les transactions en mémoire (\texttt{size=200}),
+puis applique le filtrage et la pagination \textbf{côté client}. Ce choix simplifie
+l'implémentation pour un projet académique à faible volumétrie.
+
+\subsection{Catégories}
+
+\begin{lstlisting}
+export interface Category {
+  id: number;   name: string;
+  icon?: string | null;   color?: string | null;
+  isDefault: boolean;     createdAt: string;
+}
+\end{lstlisting}
+
+La page distingue deux onglets (\textit{Dépenses} / \textit{Revenus}) et propose :
+\begin{itemize}
+  \item Une banque de 60+ icônes Material Symbols avec recherche textuelle.
+  \item 12 couleurs prédéfinies pour l'icône.
+  \item La suppression est bloquée sur les catégories \texttt{isDefault = true}.
+\end{itemize}
+
+\subsection{Budgets}
+
+\begin{lstlisting}
+export interface Budget {
+  id: number;           categoryId: number;
+  monthlyLimit: number; alertThreshold: number; // 0-100
+  createdAt: string;    updatedAt?: string | null;
+}
+\end{lstlisting}
+
+La page enrichit chaque budget avec le nom et la couleur de la catégorie associée.
+Le seuil d'alerte (\texttt{alertThreshold}) est un pourcentage : si le montant
+dépensé atteint ce seuil, le budget s'affiche en orange ou rouge.
+
+\subsection{Objectifs (\texttt{goals})}
+
+\begin{lstlisting}
+export interface Goal {
+  id: number;           name: string;
+  targetAmount: number; currentAmount: number;
+  deadline?: string | null;  status: GoalStatus;
+}
+
+export interface GoalContribution {
+  id: number;           goalId: number;
+  amount: number;       contributionDate: string;
+  note?: string | null; transactionId?: number | null;
+}
+
+export interface ContributeGoalRequest {
+  amount: number;  contributionDate: string;  note?: string | null;
+}
+\end{lstlisting}
+
+\textbf{Endpoints spéciaux :}
+\begin{itemize}
+  \item \texttt{PATCH /v1/goals/\{id\}/contribute} -- ajoute une contribution.
+  \item \texttt{GET /v1/goals/\{id\}/contributions} -- historique paginé.
+\end{itemize}
+
+La page affiche des cercles de progression via un \texttt{conic-gradient} CSS calculé
+dynamiquement. Les contributions sont chargées \textbf{à la demande} (\textit{lazy})
+par objectif.
+
+\subsection{Dettes}
+
+\begin{lstlisting}
+export interface Debt {
+  id: number;              creditorName: string;
+  totalAmount: number;     remainingAmount: number;
+  monthlyPayment: number;  interestRate?: number | null;
+  startDate: string;       dueDate?: string | null;
+  status: DebtStatus;
+}
+
+export interface DebtSummary {
+  activeDebtsCount: number;   paidDebtsCount: number;
+  totalRemainingAmount: number; totalMonthlyPayment: number;
+}
+\end{lstlisting}
+
+\textbf{Endpoints spéciaux :}
+\begin{itemize}
+  \item \texttt{PATCH /v1/debts/\{id\}/payment} -- enregistre un paiement.
+  \item \texttt{GET /v1/debts/\{id\}/payments} -- historique paginé.
+  \item \texttt{GET /v1/debts/summary} -- agrégats globaux.
+\end{itemize}
+
+\subsection{Transactions planifiées}
+
+\begin{lstlisting}
+export interface PlannedTransaction {
+  id: number;          label: string;     amount: number;
+  type: TransactionType; categoryId: number;
+  frequency: PlannedFrequency;  nextDueDate: string;
+  autoCreate: boolean; active: boolean;
+}
+\end{lstlisting}
+
+\textbf{Endpoints spéciaux :}
+\begin{itemize}
+  \item \texttt{PATCH /v1/planned-transactions/\{id\}/toggle} -- active/désactive.
+  \item \texttt{POST /v1/planned-transactions/\{id\}/run-now} -- exécution manuelle.
+  \item \texttt{GET /v1/planned-transactions/\{id\}/runs} -- historique d'exécutions.
+\end{itemize}
+
+La page applique plusieurs règles UI spécifiques :
+\begin{itemize}
+  \item La carte \og Prochaine échéance \fg{} trie les planifications filtrées
+        par \texttt{nextDueDate} croissant et affiche la plus proche échéance,
+        au lieu de reprendre le premier élément brut renvoyé par l'API.
+  \item Le formulaire de création/édition force les champs
+        \texttt{amount}, \texttt{type}, \texttt{frequency},
+        \texttt{nextDueDate} et \texttt{autoCreate} avec des contrôles
+        \texttt{nonNullable}, pour ne jamais envoyer \texttt{null} sur ces
+        valeurs au backend.
+  \item Après une exécution manuelle réussie (\texttt{run-now}), la page recharge
+        la liste complète afin de récupérer le \texttt{nextDueDate} recalculé
+        côté backend et de rafraîchir immédiatement la carte ainsi que le tableau.
+\end{itemize}
+
+\subsection{Calendrier}
+
+\begin{lstlisting}
+export interface CalendarEvent {
+  id: number;   title: string;   eventDate: string; // YYYY-MM-DD
+  amount?: number | null;   color?: string | null;
+  notes?: string | null;
+}
+\end{lstlisting}
+
+La page construit une grille de 42 jours (6 semaines × 7). Les transactions
+planifiées actives sont \textbf{projetées} dans la grille selon leur fréquence :
+\begin{itemize}
+  \item \texttt{DAILY} -- apparaît chaque jour.
+  \item \texttt{WEEKLY} -- même jour de semaine toutes les 7 jours.
+  \item \texttt{MONTHLY} -- même date chaque mois.
+  \item \texttt{YEARLY} -- même date et même mois.
+\end{itemize}
+
+\subsection{Tableau de bord}
+
+\begin{lstlisting}
+export interface MonthlySummary {
+  month: string; totalIncome: number;
+  totalExpenses: number; netBalance: number;
+  transactionCount: number;
+}
+
+export interface SpendingByCategory {
+  categoryId: number; categoryName: string;
+  amount: number; percentage: number;
+}
+
+export interface GoalProgress {
+  id: number; name: string;
+  targetAmount: number; currentAmount: number;
+  percentage: number; status: GoalStatus;
+}
+
+export interface BudgetAlert {
+  categoryName: string; monthlyLimit?: number;
+  spentAmount?: number; percentage?: number;
+  overBudget?: boolean;
+}
+\end{lstlisting}
+
+La page lance un \texttt{forkJoin} qui déclenche \textbf{7 requêtes HTTP en parallèle}
+au chargement :
+
+\begin{lstlisting}
+forkJoin({
+  summary:   dashboardService.getSummary(month),
+  spending:  dashboardService.getSpendingByCategory(month),
+  planned:   plannedService.getAll(),
+  goals:     dashboardService.getGoalsProgress(),
+  alerts:    dashboardService.getBudgetAlerts(month),
+  recent:    transactionsService.getAll(0, 5),
+  monthlyTx: transactionsService.search({ startDate, endDate }, 0, 500),
+}).subscribe({ next: (data) => { /* populate widgets */ } });
+\end{lstlisting}
+
+Chaque requête est protégée par \texttt{catchError(() => of(valeurParDefaut))} afin
+qu'une panne partielle ne bloque pas l'ensemble du tableau de bord.
+
+\textbf{Le seul graphique chart.js} de l'application (ligne chronologique) est ici :
+\begin{lstlisting}
+lineData: ChartData<'line'> = { labels: [], datasets: [{
+  data: [], borderColor: '#0f766e', fill: true, tension: 0.4
+}]};
+// Dans le template :
+// <canvas baseChart [data]="lineData" [options]="lineOptions" type="line">
+\end{lstlisting}
+
+Le graphique "donut" de répartition des dépenses est du \textbf{CSS pur} :
+\begin{lstlisting}
+get spendingBackground(): string {
+  // Construit un conic-gradient avec les proportions des catégories
+  return `conic-gradient(${stops.join(',')})`;
+}
+\end{lstlisting}
+
+\subsection{Import / Export CSV}
+
+\textbf{Export :} récupère toutes les transactions via \texttt{getAll(0,10000)},
+génère un \texttt{Blob} CSV avec BOM UTF-8 (pour compatibilité Excel) et déclenche
+un téléchargement via un lien \texttt{<a>} créé dynamiquement.
+
+\textbf{Import :} lit le fichier CSV via \texttt{FileReader}, valide chaque ligne,
+puis appelle \texttt{create()} pour chaque ligne valide.
+Les erreurs de parsing et les erreurs HTTP sont collectées et affichées dans un
+rapport détaillé.
+
+Format CSV attendu :
+\begin{lstlisting}[language=bash, numbers=none]
+date,label,amount,type,categoryId,note
+2025-03-01,Courses,45.50,EXPENSE,3,Supermarché
+2025-03-02,Salaire,2500,INCOME,1,
+\end{lstlisting}
+
+\subsection{Profil}
+
+Le service \texttt{ProfileService} appelle directement le \textbf{SDK Supabase}
+(pas le backend Spring) pour mettre à jour le nom et le mot de passe :
+
+\begin{lstlisting}
+updateProfile(req: ProfileUpdateRequest): Promise<User> {
+  return supabase.auth.updateUser({
+    data: { full_name: req.fullName }
+  });
+}
+
+updatePassword(req: PasswordUpdateRequest): Promise<User> {
+  return supabase.auth.updateUser({ password: req.newPassword });
+}
+\end{lstlisting}
+
+La page \texttt{ProfilePage} inclut également la déconnexion globale via
+\texttt{AccountService} (situé dans \texttt{core/services/}), qui appelle
+\texttt{POST /v1/account/logout-all} sur le backend Spring pour invalider
+toutes les sessions serveur.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Flux de données -- exemple complet}
+
+\begin{mdframed}[style=infobox]
+\textbf{Exemple : création d'une transaction}
+\end{mdframed}
+
+\begin{enumerate}
+  \item L'utilisateur remplit le formulaire Reactive Forms et clique sur \og Créer \fg.
+  \item Le composant vérifie \texttt{form.invalid} : si invalide, tous les champs
+        sont marqués \texttt{touched} pour afficher les erreurs ; on retourne.
+  \item \texttt{mapFormToRequest()} construit le payload :
+        un \texttt{CreateTransactionRequest} typé.
+  \item \texttt{transactionsService.create(payload)} est appelé.
+        Il retourne un \texttt{Observable<}\allowbreak\texttt{Transaction>}.
+  \item La requête \texttt{POST /v1/transactions} est construite
+        par \texttt{HttpClient}.
+  \item \texttt{authInterceptor} lit le JWT depuis le cache et ajoute
+        \texttt{Authorization: Bearer <token>}.
+  \item Le filtre de sécurité Spring valide le JWT et rattache la requête à
+        l'utilisateur authentifié.
+  \item Le contrôleur REST reçoit le JSON, le service métier vérifie les règles
+        de création, puis le repository persiste la transaction en base.
+  \item Le backend retourne \texttt{201 Created} avec le \texttt{Transaction} JSON
+        sérialisé pour le frontend.
+  \item \texttt{HttpClient} désérialise en \texttt{Transaction}.
+  \item Callback \texttt{next} : fermeture du formulaire, rechargement de la liste,
+        toast SweetAlert2 succès (\texttt{timer: 1500}).
+  \item Callback \texttt{error} : toast SweetAlert2 erreur avec message explicite.
+\end{enumerate}
+
+\begin{mdframed}[style=infobox]
+\textbf{Exemple : exécution manuelle d'une transaction planifiée}
+\end{mdframed}
+
+\begin{enumerate}
+  \item L'utilisateur clique sur l'action \texttt{run-now} depuis une ligne de la
+        page \texttt{PlannedPage}.
+  \item Une confirmation SweetAlert2 sécurise l'action avant l'appel HTTP.
+  \item \texttt{plannedService.runNow(id)} envoie
+        \texttt{POST /v1/planned-transactions/\{id\}/}\allowbreak\texttt{run-now}.
+  \item Le backend crée la transaction réelle, enregistre une ligne
+        \texttt{PlannedTransactionRun}, puis avance \texttt{nextDueDate} selon
+        la fréquence de la planification.
+  \item En cas de succès, le frontend recharge les planifications et, si le détail
+        est ouvert, recharge aussi l'historique des exécutions.
+  \item La colonne \texttt{nextDueDate} du tableau et la carte \og Prochaine
+        échéance \fg{} affichent alors immédiatement la nouvelle date renvoyée
+        par le backend.
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Flux d'authentification}
+
+\subsection{Connexion}
+
+\begin{enumerate}
+  \item L'utilisateur soumet le formulaire \texttt{LoginPage}.
+  \item \texttt{authService.signIn(email, password)} appelle le SDK Supabase.
+  \item Supabase retourne un \texttt{Session} (contenant le JWT).
+  \item \texttt{BehaviorSubject} est mis à jour via l'événement \texttt{onAuthStateChange}.
+  \item Le router navigue vers \texttt{/app/dashboard}.
+  \item Désormais, chaque requête HTTP inclura automatiquement le token via l'intercepteur.
+\end{enumerate}
+
+\subsection{Accès à une route protégée}
+
+\begin{enumerate}
+  \item L'utilisateur accède à \texttt{/app/transactions}.
+  \item \texttt{authGuard} s'exécute : \texttt{await auth.waitForInit()}.
+  \item Si session absente $\to$ redirection vers \texttt{/login}.
+  \item Si session présente $\to$ la route est activée, \texttt{MainLayout} est rendu.
+\end{enumerate}
+
+\subsection{Déconnexion}
+
+\begin{enumerate}
+  \item L'utilisateur clique sur \og Se déconnecter \fg{} dans la sidebar.
+  \item SweetAlert2 demande confirmation.
+  \item \texttt{authService.signOut()} vide la session Supabase locale.
+  \item \texttt{BehaviorSubject} émet \texttt{null}.
+  \item Le router redirige vers \texttt{/}.
+  \item L'intercepteur ne trouvant plus de token, les prochaines requêtes seront anonymes.
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Formulaires Reactive Forms}
+
+Tous les formulaires métier utilisent \textbf{Angular Reactive Forms}.
+Le pattern appliqué dans chaque composant est :
+
+\begin{lstlisting}
+// Déclaration du groupe
+form = this.fb.group({
+  label:      this.fb.nonNullable.control('', [Validators.required, Validators.maxLength(80)]),
+  amount:     this.fb.nonNullable.control(0, [Validators.required, Validators.min(0.01)]),
+  type:       this.fb.nonNullable.control('EXPENSE' as TransactionType, [Validators.required]),
+  categoryId: [null as number | null, [Validators.required]],
+  frequency:  this.fb.nonNullable.control('MONTHLY' as PlannedFrequency, [Validators.required]),
+  nextDueDate:this.fb.nonNullable.control(dayjs().format('YYYY-MM-DD'), [Validators.required]),
+  autoCreate: this.fb.nonNullable.control(false),
+});
+
+// Accesseurs typés (évite les .get('label') répétés dans le template)
+get label()      { return this.form.controls.label; }
+get amount()     { return this.form.controls.amount; }
+
+// Soumission
+submit(): void {
+  if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+  const payload = this.mapFormToRequest();
+  this.service.create(payload).subscribe({ ... });
+}
+\end{lstlisting}
+
+Cette approche réduit les erreurs de sérialisation côté backend : les champs
+primitifs ou enum ne partent plus avec \texttt{null} dans le JSON, ce qui est
+particulièrement important pour des propriétés comme \texttt{boolean autoCreate}.
+
+Le template exploite les états Angular pour l'UX :
+
+\begin{lstlisting}[language=html, numbers=none]
+<input formControlName="label"
+       [class.border-red-500]="label.invalid && label.touched"
+       required maxlength="80" />
+@if (label.invalid && label.touched) {
+  <p class="text-red-500 text-sm mt-1">
+    @if (label.hasError('required'))  { Le libellé est requis. }
+    @if (label.hasError('maxlength')) { 80 caractères maximum. }
+  </p>
+}
+<button [disabled]="form.invalid || saving" type="submit">
+  Créer
+</button>
+\end{lstlisting}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Référence des endpoints HTTP}
+
+Base URL : \texttt{http://localhost:8080/v1}
+
+\begin{longtable}{>{\small}L{1.9cm} >{\small\ttfamily}L{7.4cm} >{\small\ttfamily}L{4.5cm}}
+\toprule
+\textbf{Méthode} & \textbf{Endpoint} & \textbf{Retour} \\
+\midrule
+GET & /transactions & Page\textless Transaction\textgreater \\
+GET & /transactions/search & Page\textless Transaction\textgreater \\
+POST & /transactions & Transaction \\
+PUT & /transactions/\{id\} & Transaction \\
+DELETE & /transactions/\{id\} & void \\
+\midrule
+GET & /categories & Category[] \\
+POST & /categories & Category \\
+PUT & /categories/\{id\} & Category \\
+DELETE & /categories/\{id\} & void \\
+\midrule
+GET & /budgets & Budget[] \\
+POST & /budgets & Budget \\
+PUT & /budgets/\{id\} & Budget \\
+DELETE & /budgets/\{id\} & void \\
+\midrule
+GET & /goals & Goal[] \\
+POST & /goals & Goal \\
+PUT & /goals/\{id\} & Goal \\
+DELETE & /goals/\{id\} & void \\
+PATCH & /goals/\{id\}/contribute & Goal \\
+GET & /goals/\{id\}/contributions & Page\textless GoalContribution\textgreater \\
+\midrule
+GET & /debts & Debt[] \\
+POST & /debts & Debt \\
+PUT & /debts/\{id\} & Debt \\
+DELETE & /debts/\{id\} & void \\
+PATCH & /debts/\{id\}/payment & Debt \\
+GET & /debts/\{id\}/payments & Page\textless DebtPayment\textgreater \\
+GET & /debts/summary & DebtSummary \\
+\midrule
+GET & /planned-transactions & PlannedTransaction[] \\
+POST & /planned-transactions & PlannedTransaction \\
+PUT & /planned-transactions/\{id\} & PlannedTransaction \\
+DELETE & /planned-transactions/\{id\} & void \\
+PATCH & /planned-transactions/\{id\}/toggle & PlannedTransaction \\
+POST & /planned-transactions/\{id\}/run-now & PlannedTransactionRun \\
+GET & /planned-transactions/\{id\}/runs & Page\textless{}\allowbreak PlannedTransactionRun\textgreater{} \\
+\midrule
+GET & /calendar/events?month=YYYY-MM & CalendarEvent[] \\
+POST & /calendar/events & CalendarEvent \\
+PUT & /calendar/events/\{id\} & CalendarEvent \\
+DELETE & /calendar/events/\{id\} & void \\
+\midrule
+GET & /dashboard/summary?month=YYYY-MM & MonthlySummary \\
+GET & /dashboard/spending-by-category & SpendingByCategory[] \\
+GET & /dashboard/goals-progress & GoalProgress[] \\
+GET & /dashboard/budget-alerts & BudgetAlert[] \\
+\midrule
+POST & /account/logout-all & void \\
+\bottomrule
+\end{longtable}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Décisions d'architecture}
+
+\begin{center}
+\begin{tabularx}{\linewidth}{L{5cm} X}
+\toprule
+\textbf{Décision} & \textbf{Justification} \\
+\midrule
+Standalone components & Plus de NgModule ; chaque composant déclare ses propres
+                        imports. Plus lisible, plus modulaire, conforme aux bonnes
+                        pratiques Angular 17+. \\
+\midrule
+Lazy loading sur toutes les routes & Le bundle initial est minimal. Le code d'une
+                                     page n'est téléchargé que lorsque l'utilisateur
+                                     y accède. \\
+\midrule
+BehaviorSubject pour la session & Lecture synchrone du token dans l'intercepteur.
+                                   Pas besoin de souscrire à un Observable à chaque
+                                   requête. \\
+\midrule
+Un service par domaine & Séparation stricte des responsabilités. Chaque service
+                          connaît uniquement ses propres endpoints. \\
+\midrule
+Filtrage côté client (transactions) & Simplification pour une volumétrie faible.
+                                       Les endpoints de recherche backend existent
+                                       pour un usage en production. \\
+\midrule
+Pas d'intercepteur d'erreur centralisé & Chaque page gère ses erreurs avec le contexte
+                                          métier approprié (message adapté à l'action). \\
+\midrule
+Reactive Forms uniquement & Validation complexe (cross-fields, conditions) impossible
+                            proprement en template-driven forms. \\
+\midrule
+SweetAlert2 & UX supérieure à \texttt{window.alert/confirm}. Couleurs cohérentes
+              avec la charte graphique. \\
+\midrule
+Pas d'envoi de \texttt{userId} & Le backend identifie l'utilisateur depuis le JWT.
+                                  Aucun identifiant ne transite dans le corps des requêtes. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Sécurité}
+
+\begin{itemize}
+  \item La clé Supabase \texttt{anon} est la seule clé présente côté frontend.
+        Elle est publique par définition et ne donne accès qu'aux ressources
+        que les règles RLS (Row Level Security) Supabase autorisent.
+  \item La clé \texttt{service\_role} (clé admin Supabase) n'est \textbf{jamais} exposée
+        côté frontend.
+  \item Le JWT n'est jamais loggé ni stocké en dehors du cache interne du SDK Supabase
+        (localStorage ou cookies selon la configuration Supabase).
+  \item Le backend Spring valide le JWT sur chaque requête protégée et extrait
+        l'identité de l'utilisateur depuis le token, jamais depuis le corps de la requête.
+  \item \texttt{logout-all} appelle \texttt{POST /v1/account/logout-all} sans
+        paramètre \texttt{userId} : le backend déduit l'utilisateur depuis le token.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Environnements}
+
+\begin{lstlisting}
+// environment.ts (développement)
+export const environment = {
+  production:      false,
+  apiBaseUrl:      'http://localhost:8080/v1',
+  supabaseUrl:     'https://YOUR_PROJECT.supabase.co',
+  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
+};
+\end{lstlisting}
+
+Toutes les URL backend sont construites relativement à \texttt{environment.apiBaseUrl}.
+Il n'existe \textbf{qu'un seul préfixe} dans l'application : \texttt{/v1}.
+
+% ════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+
+Le frontend Finance Tracker est une SPA Angular bien structurée, strictement typée
+et sécurisée. Les principes de conception retenus -- séparation claire des couches,
+lazy loading, Reactive Forms, singleton services, token JWT via intercepteur --
+en font une base maintenable et extensible.
+
+Chaque domaine métier est autonome : ses modèles, son service et ses composants
+sont colocalisés dans \texttt{features/<domaine>/}. Les parties transverses
+(auth, guards, intercepteurs, types communs) sont isolées dans \texttt{core/}.
+Les composants réutilisables vivent dans \texttt{shared/}.
+
+Cette architecture est conçue pour rester lisible et explicable à mesure que
+le projet évolue, sans sur-ingénierie (pas de state management externe, pas de
+multi-comptes, pas de devise multiple).
+
+\end{document}

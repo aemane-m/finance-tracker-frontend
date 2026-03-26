@@ -2,23 +2,16 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
-  AbstractControl,
   FormBuilder,
   ReactiveFormsModule,
-  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import Swal from 'sweetalert2';
 
 import { ProfileService } from '../../services/profile.service';
 import { AuthService } from '../../../../core/services/auth.service';
-import { AccountService } from '../../../security/services/account.service';
-
-function passwordMatchValidator(ctrl: AbstractControl): ValidationErrors | null {
-  const pw  = ctrl.get('newPassword')?.value;
-  const cpw = ctrl.get('confirmPassword')?.value;
-  return pw && cpw && pw !== cpw ? { passwordMismatch: true } : null;
-}
+import { AccountService } from '../../../../core/services/account.service';
+import { passwordMatchValidator } from '../../../../core/validators/custom-validators';
 
 @Component({
   selector: 'app-profile-page',
@@ -49,7 +42,7 @@ export class ProfilePage implements OnInit {
       newPassword:     ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordMatchValidator }
+    { validators: passwordMatchValidator('newPassword', 'confirmPassword') }
   );
 
   get fullName()        { return this.profileForm.controls.fullName; }

@@ -1,15 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
+import { passwordMatchValidator } from '../../../../core/validators/custom-validators';
 import Swal from 'sweetalert2';
-
-function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
-  const password = control.get('password')?.value;
-  const confirm = control.get('confirmPassword')?.value;
-  return password && confirm && password !== confirm ? { passwordMismatch: true } : null;
-}
 
 @Component({
   selector: 'app-signup-page',
@@ -34,7 +29,7 @@ export class SignupPage {
       password: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', [Validators.required]],
     },
-    { validators: passwordMatchValidator }
+    { validators: passwordMatchValidator() }
   );
 
   get fullName() { return this.form.controls.fullName; }

@@ -1,60 +1,73 @@
-# FinanceTrackerFrontend
+# Finance Tracker Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
+Frontend Angular du projet Finance Tracker.
 
-## Development server
+## Prérequis
 
-To start a local development server, run:
+- Node.js `24.13.0`
+- npm `11.6.2`
+- Backend Finance Tracker lancé sur `http://localhost:8080`
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Si `nvm` est installé :
 
 ```bash
-ng generate component component-name
+nvm use
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Installation
 
 ```bash
-ng generate --help
+npm install
 ```
 
-## Building
-
-To build the project run:
+## Lancer le projet
 
 ```bash
-ng build
+npm start
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+L'application sera disponible sur `http://localhost:4200`.
 
-## Running unit tests
+En mode développement, Angular utilise `src/environments/environment.development.ts`, déjà versionné dans ce dépôt pour permettre un lancement direct du projet après clonage.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+## Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Le build de production utilise `src/environments/environment.ts`.
 
-For end-to-end (e2e) testing, run:
+## Tests
 
 ```bash
-ng e2e
+npm test
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Environnements
 
-## Additional Resources
+- `src/environments/environment.development.ts`
+  Utilisé par `npm start` et la configuration Angular `development`.
+- `src/environments/environment.ts`
+  Utilisé pour le build de production.
+- `src/environments/environment.development.ts.example`
+  Modèle de référence si vous souhaitez remplacer localement la configuration de développement.
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
-# finance-tracker-frontend
+Pour des overrides locaux non versionnés, vous pouvez créer vos propres fichiers `*.local.ts` : ils sont ignorés par Git.
+
+## Notes pour l'évaluation
+
+- Le dépôt contient déjà la configuration frontend de développement.
+- Après clonage, les commandes minimales sont :
+
+```bash
+npm install
+npm start
+```
+
+ou pour vérifier la compilation :
+
+```bash
+npm install
+npm run build
+```
