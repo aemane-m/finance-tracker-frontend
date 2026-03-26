@@ -10,7 +10,7 @@ type PageItem = { type: 'page'; value: number } | { type: 'gap' };
   templateUrl: './pagination.html',
 })
 export class PaginationComponent implements OnChanges {
-  /** Current page — 0-based (Spring convention) */
+  /** Current page — 0-based  */
   @Input() page = 0;
   /** Total number of pages */
   @Input() totalPages = 0;

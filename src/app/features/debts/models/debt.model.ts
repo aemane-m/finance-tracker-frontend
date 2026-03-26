@@ -25,7 +25,6 @@ export interface DebtPayment {
   createdAt: string;
 }
 
-/** Matches DebtSummaryResponse: active/paid counts, total remaining, total monthly payment */
 export interface DebtSummary {
   activeDebtsCount: number;
   paidDebtsCount: number;

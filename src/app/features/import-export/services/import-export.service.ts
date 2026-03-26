@@ -29,7 +29,7 @@ export interface ImportSummary {
 export class ImportExportService {
   private transactionsService = inject(TransactionsService);
 
-  // ── Export ────────────────────────────────────────────────────────────────
+  // ── Export 
 
   generateExportBlob(transactions: Transaction[]): Blob {
     const header = 'date,label,amount,type,categoryId,categoryName,note';
@@ -46,7 +46,7 @@ export class ImportExportService {
     return new Blob(['\uFEFF' + [header, ...rows].join('\n')], { type: 'text/csv;charset=utf-8;' });
   }
 
-  // ── Import ────────────────────────────────────────────────────────────────
+  // ── Import 
 
   /**
    * Parse le contenu texte d'un fichier CSV.
@@ -189,7 +189,7 @@ export class ImportExportService {
     return 'erreur réseau inconnue';
   }
 
-  // ── CSV helpers ───────────────────────────────────────────────────────────
+  // ── CSV helpers 
 
   private escapeCsv(value: string): string {
     if (value.includes(',') || value.includes('"') || value.includes('\n')) {

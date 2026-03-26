@@ -71,7 +71,7 @@ export class CalendarPage implements OnInit {
   readonly presetEventColors: string[] = [
     '#0f766e', '#16a34a', '#0284c7', '#7c3aed',
     '#db2777', '#dc2626', '#ea580c', '#ca8a04',
-    '#4f46e5', '#0891b2',
+    '#4f46e5', '#0891b2', '#059669', '#9333ea',
   ];
 
   get title()         { return this.form.controls.title; }
@@ -158,7 +158,6 @@ export class CalendarPage implements OnInit {
     });
   }
 
-  // ── Planned transaction recurrence projection ────────────────────────────
 
   private buildPlannedByDate(planned: PlannedTransaction[]): Map<string, PlannedTransaction[]> {
     const map = new Map<string, PlannedTransaction[]>();
@@ -220,7 +219,6 @@ export class CalendarPage implements OnInit {
     }
   }
 
-  // ── Grid ─────────────────────────────────────────────────────────────────
 
   private buildGrid(events: CalendarEvent[]): CalendarDay[] {
     const today = dayjs().format('YYYY-MM-DD');
@@ -249,7 +247,6 @@ export class CalendarPage implements OnInit {
     return cells;
   }
 
-  // ── Navigation ───────────────────────────────────────────────────────────
 
   prevMonth(): void {
     this.currentMonth = this.currentMonth.subtract(1, 'month');
@@ -276,7 +273,6 @@ export class CalendarPage implements OnInit {
     this.selectedEvent = null;
   }
 
-  // ── Form ─────────────────────────────────────────────────────────────────
 
   openCreate(day?: CalendarDay): void {
     this.editingId = null;
@@ -380,7 +376,6 @@ export class CalendarPage implements OnInit {
     });
   }
 
-  // ── Styling helpers ───────────────────────────────────────────────────────
 
   selectEventColor(color: string): void {
     this.form.controls.color.setValue(color);

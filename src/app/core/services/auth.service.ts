@@ -9,33 +9,27 @@ export class AuthService {
   private initPromise: Promise<void>;
 
   constructor(private ngZone: NgZone) {
-    // Un seul appel au démarrage pour récupérer la session existante
     this.initPromise = supabase.auth.getSession().then(({ data }) => {
       this.ngZone.run(() => this.session$.next(data.session));
     });
 
-    // Mise à jour réactive (login, logout, refresh de token automatique)
     supabase.auth.onAuthStateChange((_event, session) => {
       this.ngZone.run(() => this.session$.next(session));
     });
   }
 
-  /** Attendre la première initialisation (guards au démarrage) */
   waitForInit(): Promise<void> {
     return this.initPromise;
   }
 
-  /** Accès synchrone au token — sans verrou Supabase */
   getAccessToken(): string | null {
     return this.session$.value?.access_token ?? null;
   }
 
-  /** Accès synchrone à l'état d'authentification */
   isAuthenticated(): boolean {
     return !!this.session$.value;
   }
 
-  /** Utilisateur courant depuis la session en cache */
   getCurrentUser() {
     return this.session$.value?.user ?? null;
   }

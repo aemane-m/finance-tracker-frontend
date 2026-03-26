@@ -46,6 +46,5 @@ export interface BudgetAlert {
   spentAmount?: number;
   remainingAmount?: number;
   percentage?: number;
-  // Jackson strips "is" prefix from boolean getters → serialized as "overBudget"
   overBudget?: boolean;
 }

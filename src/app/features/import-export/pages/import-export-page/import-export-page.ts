@@ -23,13 +23,13 @@ export class ImportExportPage {
 
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
-  // ── Import ────────────────────────────────────────────────────────────────
+  // ── Import 
   importStatus: ImportStatus        = 'idle';
   importResult: ImportSummary | null = null;
   selectedFile: File | null         = null;
   isDragging                        = false;
 
-  // ── Export ────────────────────────────────────────────────────────────────
+  // ── Export 
   exporting      = false;
   exportMode: ExportMode = 'all';
   exportStartDate = '';
@@ -88,7 +88,7 @@ export class ImportExportPage {
     }
   }
 
-  // ── Drag & drop ───────────────────────────────────────────────────────────
+  // ── Drag & drop 
 
   onDragOver(e: DragEvent): void { e.preventDefault(); this.isDragging = true; }
   onDragLeave(): void            { this.isDragging = false; }
@@ -125,7 +125,7 @@ export class ImportExportPage {
     this.importResult = null;
   }
 
-  // ── Import ────────────────────────────────────────────────────────────────
+  // ── Import 
 
   uploadFile(): void {
     if (!this.selectedFile) return;
@@ -182,7 +182,7 @@ export class ImportExportPage {
     reader.readAsText(this.selectedFile, 'utf-8');
   }
 
-  // ── Export ────────────────────────────────────────────────────────────────
+  // ── Export 
 
   exportData(): void {
     if (this.isCustomRangeInvalid) return;
@@ -220,7 +220,7 @@ export class ImportExportPage {
     });
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Helpers 
 
   formatSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} o`;

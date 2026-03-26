@@ -1,9 +1,0 @@
-// Example development environment.
-// The repository already contains a runnable development environment file.
-// Use this template if you want to replace it locally with your own values.
-export const environment = {
-  production: false,
-  apiBaseUrl: 'http://localhost:8080/v1',
-  supabaseUrl: 'https://YOUR_PROJECT_REF.supabase.co',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY'
-};

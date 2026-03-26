@@ -17,8 +17,7 @@ export class ResetPasswordPage implements OnInit {
   private router = inject(Router);
 
   loading = false;
-  ready   = false; // true quand la session recovery est confirmée
-
+  ready   = false; // Indique si le token de réinitialisation est présent et valide
   form = this.fb.group({
     password:        ['', [Validators.required, Validators.minLength(8)]],
     confirmPassword: ['', Validators.required],
