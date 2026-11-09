@@ -46,3 +46,12 @@ src/environments/*.local.ts
 # System files
 .DS_Store
 Thumbs.db
+
+# Angular cache and OS files
+/.angular/
+.DS_Store
+
+# Secrets and local config: never commit credentials
+.env
+.env.*
+src/environments/environment.local.ts
